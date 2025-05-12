@@ -1,15 +1,15 @@
-# Collectoriste
+# Collectorsite
 
-> **Collectoriste** is a modern, full‑stack marketplace where passionate collectors can **buy, sell and trade** their prized items with confidence—all verified by a trusted admin workflow.
+> **Collectorsite** is a modern, full‑stack marketplace where passionate collectors can **buy, sell and trade** their prized items with confidence—all verified by a trusted admin workflow.
 >
-> Built with **Spring Boot 3 + Angular 17**, secured with **JWT**, and powered by **PostgreSQL + Flyway**, Collectoriste emphasises clean architecture, high test coverage and a delightful UI/UX.
+> Built with **Spring Boot 3 + Angular 17**, secured with **JWT**, and powered by **PostgreSQL + Flyway**, Collectorsite emphasises clean architecture, high test coverage and a delightful UI/UX.
 
 ![Collectorsite banner](docs/assets/collectorsite_banner.png)
 
 <p align="center">
-  <a href="https://github.com/your‑org/collectoriste/actions"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/your‑org/collectoriste/ci.yml?logo=github&style=for-the-badge"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/your‑org/collectoriste?style=for-the-badge"></a>
-  <a href="https://github.com/your‑org/collectoriste/releases"><img alt="Releases" src="https://img.shields.io/github/v/release/your‑org/collectoriste?include_prereleases&style=for-the-badge"></a>
+  <a href="https://github.com/your‑org/Collectorsite/actions"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/your‑org/Collectorsite/ci.yml?logo=github&style=for-the-badge"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/your‑org/Collectorsite?style=for-the-badge"></a>
+  <a href="https://github.com/your‑org/Collectorsite/releases"><img alt="Releases" src="https://img.shields.io/github/v/release/your‑org/Collectorsite?include_prereleases&style=for-the-badge"></a>
 </p>
 
 ---
@@ -47,7 +47,7 @@
                 +-------------------+                       +---------------+
 ```
 
-> **Note:** Swap Keycloak for any OIDC provider or roll your own JWT token service—Collectoriste is agnostic.
+> **Note:** Swap Keycloak for any OIDC provider or roll your own JWT token service—Collectorsite is agnostic.
 
 ---
 
@@ -64,8 +64,8 @@
 
 ```bash
 # Fork first, then:
-$ git clone https://github.com/your-org/collectoriste.git
-$ cd collectoriste
+$ git clone https://github.com/your-org/Collectorsite.git
+$ cd Collectorsite
 
 # Spin everything up (backend, frontend, db, pgAdmin)
 $ make dev       # or: docker compose up --build -d
@@ -79,7 +79,7 @@ Open **[http://localhost:4200](http://localhost:4200)** for the Angular app and 
 | ------------- | ----------------- | -------------------- |
 | `DB_HOST`     | `localhost`       | PostgreSQL host      |
 | `DB_PORT`     | `5432`            | PostgreSQL port      |
-| `DB_NAME`     | `collectoriste`   | DB name              |
+| `DB_NAME`     | `Collectorsite`   | DB name              |
 | `DB_USER`     | `collector`       | DB user              |
 | `DB_PASSWORD` | `password`        | DB password          |
 | `JWT_SECRET`  | `please‑changeme` | HMAC 256 signing key |
@@ -118,7 +118,7 @@ $ pnpm test
 ## 📂 Project Structure
 
 ```
-collectoriste/
+Collectorsite/
 ├── backend/                # Spring Boot app (Maven multi‑module)
 │   ├── api/                # REST controllers, DTOs
 │   ├── domain/             # Business entities & services
@@ -156,7 +156,7 @@ Please read [CODE\_OF\_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
 * [ ] V3: Stripe integration, escrow payments
 * [ ] V4: Mobile PWA + offline mode
 
-See the [project board](https://github.com/your‑org/collectoriste/projects/1).
+See the [project board](https://github.com/your‑org/Collectorsite/projects/1).
 
 ---
 
