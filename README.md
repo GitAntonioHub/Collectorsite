@@ -4,7 +4,7 @@
 >
 > Built with **Spring Boot 3 + Angular 17**, secured with **JWT**, and powered by **PostgreSQL + Flyway**, Collectoriste emphasises clean architecture, high test coverage and a delightful UI/UX.
 
-![Collectoriste banner](docs/assets/collectoriste_banner.png)
+![Collectorsite banner](docs/assets/collectorsite_banner.png)
 
 <p align="center">
   <a href="https://github.com/your‑org/collectoriste/actions"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/your‑org/collectoriste/ci.yml?logo=github&style=for-the-badge"></a>
