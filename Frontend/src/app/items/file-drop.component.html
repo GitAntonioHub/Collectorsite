@@ -1,6 +1,6 @@
   <div class="drop-zone"
   [class.drag]="drag"
-  (dragover)="drag=$event.preventDefault()||true"
+       (dragover)="$event.preventDefault(); drag=true"
 (dragleave)="drag=false"
 (drop)="onDrop($event)">
 <p>Drop files here or click to choose</p>
