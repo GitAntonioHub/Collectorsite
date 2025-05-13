@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/collectorsite
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -12,3 +12,6 @@ spring:
     locations: classpath:db/migration
 server:
   port: 8080
+jwt:
+  secret: 2B4B6250655368566D597133743677397A24432646294A404E635266546A576E
+  expiration: 86400000
