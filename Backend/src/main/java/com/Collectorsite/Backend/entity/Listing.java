@@ -30,10 +30,21 @@ public class Listing {
     private String currency = "USD";
 
     @Column(nullable = false, updatable = false)
-    private Instant startDate = Instant.now();
+    private Instant startDate;
 
     private Instant endDate;
 
+    @PrePersist
+    private void onCreate() {
+        if (startDate == null) {
+            startDate = Instant.now();
+        }
+        if (endDate == null) {
+            endDate = Instant.now();
+        }
+    }
+
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private ListingStatus status = ListingStatus.ACTIVE;
 }

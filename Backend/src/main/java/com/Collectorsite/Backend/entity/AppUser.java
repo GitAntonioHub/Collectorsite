@@ -26,10 +26,16 @@ public class AppUser {
     private Double rating;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
-
+    private Instant createdAt;
+    @PrePersist
+    private void onCreate() {
+        if (createdAt == null) {
+            createdAt = java.time.Instant.now();
+        }
+    }
     private Instant lastLogin;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

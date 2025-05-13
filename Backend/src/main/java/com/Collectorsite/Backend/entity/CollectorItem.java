@@ -31,11 +31,18 @@ public class CollectorItem {
     private Integer year;
     private Double estimatedValue;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private ItemStatus status = ItemStatus.DRAFT;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
+    @PrePersist
+    private void onCreate() {
+        if (createdAt == null) {
+            createdAt = Instant.now();
+        }
+    }
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemImage> images = new ArrayList<>();
