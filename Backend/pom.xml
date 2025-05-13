@@ -132,6 +132,15 @@
 			<artifactId>mapstruct</artifactId>
 			<version>1.5.5.Final</version>
 		</dependency>
+		<!-- MinIO / S3 client -->
+		<dependency>
+			<groupId>io.minio</groupId><artifactId>minio</artifactId><version>8.5.8</version>
+		</dependency>
+
+		<!-- Spring WebSocket / STOMP -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

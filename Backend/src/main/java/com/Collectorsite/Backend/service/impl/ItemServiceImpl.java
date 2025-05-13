@@ -1,11 +1,12 @@
 package com.Collectorsite.Backend.service.impl;
 
+import com.Collectorsite.Backend.enums.ItemStatus;
 import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.dto.ItemDTO;
 import com.Collectorsite.Backend.entity.*;
 import com.Collectorsite.Backend.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ public class ItemServiceImpl implements ItemService {
 
     private final CollectorItemRepository itemRepo;
     private final AppUserRepository userRepo;
+    private final VerificationRequestRepository verRepo;
 
     private ItemDTO map(CollectorItem item) {
         return ItemDTO.builder()
@@ -38,10 +40,17 @@ public class ItemServiceImpl implements ItemService {
                 .year(dto.getYear())
                 .estimatedValue(dto.getEstimatedValue())
                 .owner(owner)
+                .status(ItemStatus.DRAFT)
                 .build();
 
         itemRepo.save(item);
+        verRepo.save(VerificationRequest.builder()
+                .item(item)
+                .requestedBy(owner)
+                .build());
+
         return map(item);
+
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor
 @Transactional
-public class ListingServiceImpl implements ListingService {
+public abstract class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepo;
     private final CollectorItemRepository itemRepo;

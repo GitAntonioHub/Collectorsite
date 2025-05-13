@@ -10,8 +10,19 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
 server:
   port: 8080
 jwt:
   secret: 2B4B6250655368566D597133743677397A24432646294A404E635266546A576E
   expiration: 86400000
+
+storage:
+  bucket: items
+  endpoint: http://localhost:9000    # MinIO dev
+  accessKey: minio
+  secretKey: minio123
+  region: us‑east‑1
