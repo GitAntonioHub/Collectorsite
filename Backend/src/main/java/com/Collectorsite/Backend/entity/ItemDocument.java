@@ -22,5 +22,11 @@ public class ItemDocument {
     private String filePath;
 
     @Column(nullable = false, updatable = false)
-    private Instant uploadedAt = Instant.now();
+    private Instant uploadedAt;
+    @PrePersist                              // ← NEW
+    private void onCreate() {
+        if (uploadedAt == null) {
+            uploadedAt = Instant.now();
+        }
+    }
 }

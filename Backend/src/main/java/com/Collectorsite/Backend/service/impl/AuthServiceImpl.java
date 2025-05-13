@@ -8,8 +8,7 @@ import com.Collectorsite.Backend.repository.*;
 import com.Collectorsite.Backend.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import java.util.*;
+import org.springframework.stereotype.*;
 
 @Service @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -26,6 +25,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .build();
+
+        if (user.getRoles() == null) user.setRoles(new java.util.HashSet<>());
 
         Role userRole = roleRepo.findByName(RoleName.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Role not initialized"));
