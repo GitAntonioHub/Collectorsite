@@ -72,17 +72,17 @@ public abstract class ListingServiceImpl implements ListingService {
 
     @Override
     public ListingDTO close(UUID listingId, UUID sellerId) {
-        Listing listing = listingRepo.findById(listingId)
-                .orElseThrow(() -> new RuntimeException("Listing not found"));
-
-        if (!listing.getSeller().getId().equals(sellerId))
+        Listing l = listingRepo.findById(listingId).orElseThrow();
+        if (!l.getSeller().getId().equals(sellerId))
             throw new RuntimeException("Not your listing");
 
-        listing.setStatus(ListingStatus.CLOSED);
-        listing.getItem().setStatus(ItemStatus.SOLD);   // or keep LISTED for trades
+        l.setStatus(ListingStatus.CLOSED);
+        l.getItem().setStatus(ItemStatus.SOLD);
+        // Optionally create or link to Transaction here
 
-        return map(listing);
+        return map(l);
     }
+
 
     @Override
     public List<ListingDTO> listActive() {
