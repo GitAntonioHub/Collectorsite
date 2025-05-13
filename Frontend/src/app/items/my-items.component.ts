@@ -5,43 +5,35 @@ import { ApiService } from '../core/api.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-
-interface ItemDTO {
-  id: string;
-  title: string;
-  description: string;
-}
+import { ItemDetailComponent } from './item-detail.component';
+import { ItemDTO } from './models';
 
 @Component({
   selector: 'app-my-items',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, ItemDetailComponent],
   template: `
-  <section class="p-6 max-w-xl mx-auto">
-    <form [formGroup]="fg" (ngSubmit)="create()" class="space-y-4">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Title</mat-label>
-        <input matInput formControlName="title">
-      </mat-form-field>
+    <section class="p-6 grid lg:grid-cols-2 gap-10">
+      <!-- create form -->
+      <form [formGroup]="fg" (ngSubmit)="create()" class="space-y-4">
+        <!-- title + description inputs … -->
+      </form>
 
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Description</mat-label>
-        <textarea matInput rows="3" formControlName="description"></textarea>
-      </mat-form-field>
-
-      <button mat-raised-button type="submit" color="primary" class="w-full">Create item</button>
-    </form>
-
-    <h2 class="mt-10 font-semibold">My items</h2>
-    <ul class="mt-2 list-disc pl-5">
-      <li *ngFor="let i of items">{{ i.title }}</li>
-    </ul>
-  </section>
+      <!-- detail / upload pane -->
+      <ng-container *ngIf="selected">
+        <item-detail
+          [itemId]="selected.id"
+          [title]="selected.title"
+          [description]="selected.description">
+        </item-detail>
+      </ng-container>
+    </section>
   `
 })
 export class MyItemsComponent implements OnInit {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
+  selected?: ItemDTO;
 
   fg: FormGroup = this.fb.group({
     title: [''],

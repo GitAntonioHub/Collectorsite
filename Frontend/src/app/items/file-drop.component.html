@@ -1,0 +1,8 @@
+  <div class="drop-zone"
+  [class.drag]="drag"
+  (dragover)="drag=$event.preventDefault()||true"
+(dragleave)="drag=false"
+(drop)="onDrop($event)">
+<p>Drop files here or click to choose</p>
+<input type="file" class="hidden" multiple #inp (change)="onFiles(inp.files!)">
+</div>
