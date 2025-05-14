@@ -7,6 +7,7 @@ import { AuthStore } from '../core/state/auth.store';       // << path fixed
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import {AuthService} from './auth.service';
 
 @Component({
   standalone: true,
@@ -15,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
     CommonModule, FormsModule,
     MatFormFieldModule, MatInputModule, MatButtonModule
   ],
+
   template: `
     <div class="flex justify-center items-center h-[calc(100vh-64px)]">
       <form (ngSubmit)="login()" class="w-72 space-y-4">
@@ -36,19 +38,11 @@ export class LoginComponent {
   username = '';
   password = '';
 
-  constructor(
-    private api: ApiService,
-    private auth: AuthStore,
-    private router: Router
-  ) {}
+  constructor(private authSvc: AuthService, private router: Router) {}
 
   login() {
-    this.api.post<{ token: string }>('/auth/login', {
-      username: this.username,
-      password: this.password
-    }).subscribe(res => {
-      this.auth.setToken(res.token);
-      this.router.navigateByUrl('/');
-    });
+    this.authSvc.login(this.username, this.password)
+      .subscribe(() => this.router.navigateByUrl('/'));
   }
+
 }

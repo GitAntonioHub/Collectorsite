@@ -1,22 +1,15 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../enviroments/enviroment';
+/* src/app/core/api.service.ts */
+import {inject, Injectable} from '@angular/core';
+import {environment} from '../../enviroments/enviroment';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
   private base = environment.api;
 
-  get<T>(url: string, params?: Record<string, any>): Observable<T> {
-    return this.http.get<T>(this.base + url, { params: new HttpParams({ fromObject: params }) });
-  }
-
-  post<T>(url: string, body: unknown): Observable<T> {
-    return this.http.post<T>(this.base + url, body);
-  }
-
-  put<T>(url: string, body?: unknown): Observable<T> {
-    return this.http.put<T>(this.base + url, body);
-  }
+  get  = <T>(u: string, p?: any) => this.http.get<T>(this.base + u, { params: p });
+  post = <T>(u: string, b: any)  => this.http.post<T>(this.base + u, b);
+  put  = <T>(u: string, b?: any) => this.http.put<T>(this.base + u, b);
+  del  = <T>(u: string)          => this.http.delete<T>(this.base + u);
 }

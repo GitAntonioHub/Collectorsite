@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <header class="fixed top-4 inset-x-0 flex justify-center z-10">
       <div class="flex gap-3">
-        <a routerLink="/" class="retro-btn font-bold w-40">Collector‑Site</a>
+        <a routerLink="/"  routerLinkActive="scale-110" class="retro-btn">Collector-site</a>
         <a routerLink="/listings"  routerLinkActive="scale-110" class="retro-btn">Browse</a>
         <a routerLink="/my-items"  routerLinkActive="scale-110" class="retro-btn">My&nbsp;Items</a>
         <a routerLink="/offers"    routerLinkActive="scale-110" class="retro-btn">Trade</a>
