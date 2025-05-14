@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
         <a routerLink="/my-items"  routerLinkActive="scale-110" class="retro-btn">My&nbsp;Items</a>
         <a routerLink="/offers"    routerLinkActive="scale-110" class="retro-btn">Trade</a>
         <a routerLink="/verify"    routerLinkActive="scale-110" class="retro-btn">Admin</a>
+        <a href="/auth/login"       class="retro-btn">Login</a>
       </div>
     </header>
   `
