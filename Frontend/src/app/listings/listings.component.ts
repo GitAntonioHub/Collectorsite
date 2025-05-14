@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ViewChild } from '@angular/core';
+import {ListingService} from './listing.service';
 
 interface Page<T> {
   content: T[];
@@ -63,18 +64,13 @@ export class ListingsComponent implements OnInit {
   q = new FormControl('');
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+  private listSvc = inject(ListingService);
 
   ngOnInit() {
     merge(this.q.valueChanges, this.paginator.page)
       .pipe(
         startWith(''),
-        switchMap(() =>
-          this.api.get<Page<ListingDTO>>('/listings', {
-            q: this.q.value ?? '',
-            page: this.paginator.pageIndex,
-            size: this.paginator.pageSize
-          })
-        )
+        switchMap(()=> this.listSvc.feed(this.q.value ?? '', this.paginator.pageIndex, this.paginator.pageSize))
       )
       .subscribe(res => {
         this.data.data = res.content;

@@ -6,11 +6,13 @@ import { CommonModule } from '@angular/common';
   selector: 'shared-footer',
   imports: [CommonModule],
   template: `
-    <footer class="fixed bottom-4 inset-x-0 flex justify-center z-10">
-    <span class="retro-btn px-6 py-2 text-xs w-auto">
-      © {{year}} Collector‑Site · Retro Marketplace
+    <!-- footer -->
+    <footer>
+    <span class="retro-btn" style="width:auto;padding:0 2rem">
+      © <span id="yr"></span> Collector‑Site
     </span>
     </footer>
+
   `
 })
 export class SharedFooterComponent {

@@ -3,13 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../core/api.service';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
-
-interface VerificationDTO {
-  id: string;
-  itemId: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  notes: string;
-}
+import {VerificationService} from './verification.service';
+import { VerificationDTO } from './models';
 
 @Component({
   standalone: true,
@@ -48,17 +43,15 @@ export class VerifyListComponent implements OnInit {
 
   ngOnInit() { this.load(); }
 
-  load() {
-    this.api.get<VerificationDTO[]>('/verification/pending')
-      .subscribe(res => this.rows = res);
-  }
+  private verSvc = inject(VerificationService);
 
-  approve(r: VerificationDTO) {
-    this.decision(r, 'APPROVED');
-  }
-  reject(r: VerificationDTO) {
-    this.decision(r, 'REJECTED');
-  }
+  load(){ this.verSvc.pending().subscribe(r=>this.rows=r); }
+
+
+  approve(r:VerificationDTO){ this.verSvc.decide(r.id,'APPROVED').subscribe(()=>this.load()); }
+
+  reject (r:VerificationDTO){ this.verSvc.decide(r.id,'REJECTED' ).subscribe(()=>this.load()); }
+
 
   private decision(r: VerificationDTO, decision: 'APPROVED' | 'REJECTED') {
     this.api.post<VerificationDTO>('/verification/decide', {

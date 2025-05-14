@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemDetailComponent } from './item-detail.component';
 import { ItemDTO } from './models';
+import {ItemService} from './item.service';
 
 @Component({
   selector: 'app-my-items',
@@ -40,22 +41,15 @@ export class MyItemsComponent implements OnInit {
     description: ['']
   });
 
+
+  private itemSvc = inject(ItemService);
   items: ItemDTO[] = [];
 
-  ngOnInit() {
-    this.load();
+  ngOnInit(){ this.load(); }
+  load(){ this.itemSvc.myItems().subscribe(r=>this.items=r); }
+
+  create(){
+    this.itemSvc.create(this.fg.value).subscribe(()=>this.load());
   }
 
-  create() {
-    this.api.post<ItemDTO>('/items', this.fg.value)
-      .subscribe(() => {
-        this.fg.reset();
-        this.load();
-      });
-  }
-
-  load() {
-    this.api.get<ItemDTO[]>('/items')   // add a backend endpoint if needed
-      .subscribe(res => this.items = res);
-  }
 }

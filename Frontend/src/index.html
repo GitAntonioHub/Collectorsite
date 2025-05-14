@@ -31,8 +31,8 @@
     .retro-btn{
       display:inline-flex;align-items:center;justify-content:center;
       width:8rem;height:2.5rem;
-      border:2px solid #fff;background:#000;color:#00bfff;
-      text-decoration:none;text-transform:uppercase;font-size:.75rem;
+      border:2px solid #fff;background:#000;color: #ffffff;
+      text-decoration:none;text-transform:uppercase;font-size:1.15rem;
       letter-spacing:.05em;transition:.2s transform;
     }
     .retro-btn:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.4)}
@@ -41,7 +41,7 @@
     header,footer{position:fixed;left:0;right:0;display:flex;justify-content:center;z-index:5}
     header{top:1rem}footer{bottom:1rem}
 
-    main{padding:5rem 1rem 4rem;text-align:center}
+    main{padding:5rem 1rem 4rem;text-align:center; font-size: 1.25rem;letter-spacing: 2px}
   </style>
 </head>
 
@@ -51,34 +51,18 @@
 <img src="assets/holo-left.png"  class="holo holo-left"  alt="">
 <img src="assets/holo-right.png" class="holo holo-right" alt="">
 
-<!-- header nav -->
-<header>
-  <nav class="flex gap-3">
-    <a href="/"            class="retro-btn" style="font-weight:700;width:10rem">Collector‑Site</a>
-    <a href="/listings"    class="retro-btn">Browse</a>
-    <a href="/my-items"    class="retro-btn">My&nbsp;Items</a>
-    <a href="/offers"      class="retro-btn">Trade</a>
-    <a href="/verify"      class="retro-btn">Admin</a>
-    <a href="/login"       class="retro-btn">Login</a>
-  </nav>
-</header>
+
 
 <!-- Angular app mounts here -->
 <main>
   <!-- optional landing copy shown while Angular loads -->
-  <h1>Collectorsite Marketplace</h1>
+  <h1>Collector-site Marketplace</h1>
   <p>The Unified Collector Store</p>
   <p>Buy · Sell · Trade Unique Items</p>
 
   <app-root></app-root>
 </main>
 
-<!-- footer -->
-<footer>
-    <span class="retro-btn" style="width:auto;padding:0 2rem">
-      © <span id="yr"></span> Collector‑Site
-    </span>
-</footer>
 
 <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
 </body>
