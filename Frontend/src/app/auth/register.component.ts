@@ -12,7 +12,40 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   selector: 'app-register',
   imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
-  template: ` … same HTML … `
+  template:`
+  <div class=\"flex justify-center items-center h-[calc(100vh-160px)]\">
+    <form [formGroup]=\"fg\" (ngSubmit)=\"submit()\" class=\"w-80 space-y-5\">
+
+      <mat-form-field appearance=\"fill\" class=\"w-full\">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName=\"u\" required>
+      </mat-form-field>
+
+      <mat-form-field appearance=\"fill\" class=\"w-full\">
+        <mat-label>Email</mat-label>
+        <input matInput type=\"email\" formControlName=\"e\" required>
+      </mat-form-field>
+
+      <mat-form-field appearance=\"fill\" class=\"w-full\">
+        <mat-label>Password</mat-label>
+        <input matInput type=\"password\" formControlName=\"p\" required>
+      </mat-form-field>
+
+      <mat-form-field appearance=\"fill\" class=\"w-full\">
+        <mat-label>Repeat password</mat-label>
+        <input matInput type=\"password\" formControlName=\"r\" required>
+      </mat-form-field>
+
+      <button mat-raised-button color=\"primary\" class=\"w-full\" [disabled]=\"fg.invalid || mismatch\">
+        Register
+      </button>
+
+      <p *ngIf=\"mismatch\" class=\"text-xs text-red-400 text-center\">Passwords don’t match</p>
+
+      <p class=\"text-xs text-center\">Already registered?
+        <a routerLink=\"/login\" class=\"underline\">Login</a></p>
+    </form>
+  </div>`
 })
 export class RegisterComponent {
   fg: FormGroup;

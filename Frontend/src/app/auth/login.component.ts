@@ -15,7 +15,25 @@ import { MatButtonModule } from '@angular/material/button';
     CommonModule, ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatButtonModule
   ],
-  template: ` … same HTML as before … `
+  template:`
+    <div class=\"flex justify-center items-center h-[calc(100vh-160px)]\">
+      <form [formGroup]=\"fg\" (ngSubmit)=\"submit()\" class=\"w-72 space-y-5\">
+        <mat-form-field appearance=\"fill\" class=\"w-full\">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName=\"u\" required>
+        </mat-form-field>
+
+        <mat-form-field appearance=\"fill\" class=\"w-full\">
+          <mat-label>Password</mat-label>
+          <input matInput type=\"password\" formControlName=\"p\" required>
+        </mat-form-field>
+
+        <button mat-raised-button color=\"primary\" class=\"w-full\" [disabled]=\"fg.invalid\">Login</button>
+
+        <p class=\"text-xs text-center\">No account?
+          <a routerLink=\"/register\" class=\"underline\">Register</a></p>
+      </form>
+    </div>`
 })
 export class LoginComponent {
   fg: FormGroup;
