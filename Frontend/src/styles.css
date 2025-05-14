@@ -1,6 +1,28 @@
-@import 'styles/fonts.css';   /* ← add this line first */
+/* ---------- custom font ---------- */
+@import 'styles/fonts.css';
 
-/* Tailwind layers */
+/* ---------- Tailwind layers ---------- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------- global retro background ---------- */
+html, body { height: 100%; }
+
+body {
+  /* full‑viewport cover */
+  background: url('/assets/bg.jpg') center / cover no-repeat fixed;
+  color: #fff;
+  font-family: 'RetroFuture', sans-serif;
+}
+
+
+/* ---------- retro button utility ---------- */
+.retro-btn {
+  @apply inline-flex items-center justify-center
+  border-2 border-white bg-white text-black
+  w-32 h-10 text-sm tracking-wide font-retro
+  transition-transform duration-200 select-none;
+}
+.retro-btn:hover { @apply -translate-y-0.5 shadow-lg; }
+.font-retro { font-family: 'RetroFuture', sans-serif; }

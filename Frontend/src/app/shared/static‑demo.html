@@ -1,57 +1,58 @@
-<!-- src/index.html -->
+<!-- static-demo.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Collector‑Site</title>
-  <base href="/">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
   <style>
     /* ---------- font ---------- */
     @font-face{
       font-family:'RetroFuture';
-      src:url('assets/fonts/Retrofuturistic.ttf') format('truetype');
+      src:url('../../assets/fonts/Retrofuturistic.ttf') format('truetype');
       font-display:swap;
     }
 
     /* ---------- base ---------- */
-    html,body{height:100%;margin:0;font-family:'RetroFuture',sans-serif;color:#00bfff}
-    body{
-      background:url('assets/bg.jpg') center/cover no-repeat fixed;
+    html,body{height:100%;margin:0;font-family:'RetroFuture',sans-serif;color: #00bfff
     }
+    body{
+      background:url('../../assets/bg.jpg') center/cover no-repeat fixed;
+    }
+    body::before{content:'';position:fixed;inset:0;z-index:-1}
 
-    /* hologram spin */
+    /* ---------- holograms ---------- */
     @keyframes spinY{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
     .holo{position:absolute;top:40%;transform:translateY(-40%);
       width:300px;height:300px;opacity:.85;animation:spinY 12s linear infinite}
     .holo-left{left:1rem}.holo-right{right:1rem;animation-direction:reverse}
 
-    /* retro buttons */
+    /* ---------- nav & footer buttons ---------- */
     .retro-btn{
       display:inline-flex;align-items:center;justify-content:center;
       width:8rem;height:2.5rem;
-      border:2px solid #fff;background:#000;color:#00bfff;
+      border:2px solid #fff;background: #000000;color: #00bfff;
       text-decoration:none;text-transform:uppercase;font-size:.75rem;
       letter-spacing:.05em;transition:.2s transform;
     }
     .retro-btn:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.4)}
 
-    /* header/footer containers */
+    /* header & footer containers */
     header,footer{position:fixed;left:0;right:0;display:flex;justify-content:center;z-index:5}
     header{top:1rem}footer{bottom:1rem}
 
+    /* page placeholder */
     main{padding:5rem 1rem 4rem;text-align:center}
   </style>
 </head>
-
 <body>
 
-<!-- spinning holograms -->
-<img src="assets/holo-left.png"  class="holo holo-left"  alt="">
-<img src="assets/holo-right.png" class="holo holo-right" alt="">
+<!-- holograms -->
+<img src="../../assets/holo-left.png"  class="holo holo-left"  alt="">
 
-<!-- header nav -->
+<img src="../../assets/holo-right.png" class="holo holo-right" alt="">
+
+<!-- header -->
 <header>
   <nav class="flex gap-3">
     <a href="/"            class="retro-btn" style="font-weight:700;width:10rem">Collector‑Site</a>
@@ -63,21 +64,16 @@
   </nav>
 </header>
 
-<!-- Angular app mounts here -->
 <main>
-  <!-- optional landing copy shown while Angular loads -->
   <h1>Collectorsite Marketplace</h1>
   <p>The Unified Collector Store</p>
-  <p>Buy · Sell · Trade Unique Items</p>
-
-  <app-root></app-root>
+  <p>Buy Sell and Trade Unique Items</p>
 </main>
 
-<!-- footer -->
 <footer>
-    <span class="retro-btn" style="width:auto;padding:0 2rem">
-      © <span id="yr"></span> Collector‑Site
-    </span>
+  <span class="retro-btn" style="width:auto;padding:0 2rem">
+    © <span id="yr"></span> Collector‑Site
+  </span>
 </footer>
 
 <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
