@@ -57,7 +57,7 @@ Angular 17  ⇆  Spring Boot 3
 ### 2 Clone & boot infra
 
 ```bash
-git clone https://github.com/yourname/Collectorsite.git
+git clone https://github.com/GitAntonioHub/Collectorsite.git
 cd Collectorsite
 docker compose -f docker-compose.dev.yml up -d   # Postgres + MinIO
 ```
