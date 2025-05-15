@@ -27,7 +27,7 @@ jwt:
 storage:
   enabled: false
   bucket: items
-  endpoint: http://localhost:9000    # MinIO dev
+  endpoint: http://localhost:9000
   accessKey: minioadmin
   secretKey: minioadmin
   region: us‑east‑1

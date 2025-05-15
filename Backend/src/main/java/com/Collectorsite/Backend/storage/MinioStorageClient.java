@@ -5,6 +5,7 @@ import io.minio.http.Method;
 import jakarta.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.web.ErrorResponseException;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @Primary                // preferred bean if several are present
-@Profile("!dev")        // gets skipped in the "dev" spring profile
+@ConditionalOnProperty(name = "storage.enabled", havingValue = "true")
 public class MinioStorageClient implements ObjectStorage {
 
     // ---------------------------------------------------------------- config

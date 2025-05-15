@@ -18,6 +18,11 @@ const css = `
 .holo{position:absolute;top:40%;transform:translateY(-40%);
       width:300px;height:300px;opacity:.85;animation:spinY 12s linear infinite}
 .holo-left{left:1rem}.holo-right{right:1rem;animation-direction:reverse}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+}
 `;
 
 @Component({
@@ -26,9 +31,11 @@ const css = `
   imports:[CommonModule],
   styles:[css],
   template:`
-    <img *ngIf="showHolo" src="../../assets/holo-left.png"  class="holo holo-left"[style.animation-play-state]="playState()"/>
-    <img *ngIf="showHolo" src="../../assets/holo-right.png" class="holo holo-right"[style.animation-play-state]="playState()"/>
-    <ng-content/>
+    <div class="content-wrapper">
+      <img *ngIf="showHolo" src="../../assets/holo-left.png"  class="holo holo-left"[style.animation-play-state]="playState()"/>
+      <img *ngIf="showHolo" src="../../assets/holo-right.png" class="holo holo-right"[style.animation-play-state]="playState()"/>
+      <ng-content></ng-content>
+    </div>
   `
 })
 export class HoloBackgroundComponent{
