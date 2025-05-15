@@ -1,6 +1,6 @@
 /* src/app/auth/register.component.ts */
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './auth.service';
@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   standalone: true,
   selector: 'app-register',
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, RouterLink],
   template:`
   <div class=\"flex justify-center items-center h-[calc(100vh-160px)]\">
     <form [formGroup]=\"fg\" (ngSubmit)=\"submit()\" class=\"w-80 space-y-5\">

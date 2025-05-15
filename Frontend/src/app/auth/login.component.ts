@@ -1,6 +1,6 @@
 /* src/app/auth/login.component.ts */
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from './auth.service';
@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
   selector: 'app-login',
   imports: [
     CommonModule, ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatButtonModule
+    MatFormFieldModule, MatInputModule, MatButtonModule, RouterLink
   ],
   template:`
     <div class=\"flex justify-center items-center h-[calc(100vh-160px)]\">

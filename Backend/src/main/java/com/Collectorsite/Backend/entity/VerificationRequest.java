@@ -31,5 +31,6 @@ public class VerificationRequest {
     private Instant verifiedAt;
 
     @Lob
+    @Column(columnDefinition = "text")
     private String notes;
 }

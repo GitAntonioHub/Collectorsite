@@ -1,100 +1,132 @@
 package com.Collectorsite.Backend.service.impl;
 
+import com.Collectorsite.Backend.dto.CreateListingDTO;
+import com.Collectorsite.Backend.dto.ListingDTO;
+import com.Collectorsite.Backend.entity.CollectorItem;
+import com.Collectorsite.Backend.entity.Listing;
+import com.Collectorsite.Backend.enums.ItemStatus;
+import com.Collectorsite.Backend.enums.ListingStatus;
+import com.Collectorsite.Backend.enums.ListingType;
+import com.Collectorsite.Backend.repository.CollectorItemRepository;
+import com.Collectorsite.Backend.repository.ListingRepository;
 import com.Collectorsite.Backend.service.ListingService;
-import com.Collectorsite.Backend.dto.*;
-import com.Collectorsite.Backend.entity.*;
-import com.Collectorsite.Backend.enums.*;
-import com.Collectorsite.Backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Service @RequiredArgsConstructor
+/**
+ * Simple implementation – feel free to replace with MapStruct + richer mapping later.
+ */
+@Service
+@RequiredArgsConstructor
 @Transactional
-public abstract class ListingServiceImpl implements ListingService {
+public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepo;
     private final CollectorItemRepository itemRepo;
-    private final AppUserRepository userRepo;
 
-    private ListingDTO map(Listing l) {
+    /* ---------- helpers ---------- */
+
+    private static ListingDTO toDto(Listing l) {
         return ListingDTO.builder()
                 .id(l.getId())
                 .itemId(l.getItem().getId())
                 .listingType(l.getListingType())
                 .price(l.getPrice())
                 .currency(l.getCurrency())
+                .status(l.getStatus())
                 .startDate(l.getStartDate())
                 .endDate(l.getEndDate())
-                .status(l.getStatus())
                 .build();
     }
 
+    /* ---------- API ---------- */
+
     @Override
     public ListingDTO create(CreateListingDTO dto, UUID sellerId) {
-
         CollectorItem item = itemRepo.findById(dto.getItemId())
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
         if (!item.getOwner().getId().equals(sellerId))
-            throw new RuntimeException("You do not own this item");
+            throw new RuntimeException("Not your item");
 
-        if (listingRepo.existsByItem_IdAndStatus(item.getId(), ListingStatus.ACTIVE))
-            throw new RuntimeException("Item already listed");
+        if (item.getStatus() != ItemStatus.LISTED && item.getStatus() != ItemStatus.DRAFT)
+            throw new RuntimeException("Item cannot be listed now");
 
-        AppUser seller = userRepo.findById(sellerId).orElseThrow();
-
-        Instant end = dto.getDurationDays() != null
-                ? Instant.now().plusSeconds(dto.getDurationDays() * 86_400)
-                : null;
-
-        Listing listing = Listing.builder()
-                .item(item)
-                .seller(seller)
-                .listingType(dto.getListingType() == null ? ListingType.SALE : dto.getListingType())
-                .price(dto.getPrice() == null ? BigDecimal.ZERO : dto.getPrice())
-                .currency(dto.getCurrency() == null ? "USD" : dto.getCurrency())
-                .endDate(end)
-                .build();
-
-        // mark item as LISTED
-        item.setStatus(ItemStatus.LISTED);
+        Listing listing = new Listing();
+        listing.setId(UUID.randomUUID());
+        listing.setItem(item);
+        listing.setListingType(dto.getListingType() == null ? ListingType.SALE : dto.getListingType());
+        listing.setPrice(dto.getPrice());
+        listing.setCurrency(dto.getCurrency());
+        listing.setStatus(ListingStatus.ACTIVE);
+        listing.setStartDate(Instant.now());
 
         listingRepo.save(listing);
-        return map(listing);
+
+        item.setStatus(ItemStatus.LISTED);
+
+        return toDto(listing);
     }
 
     @Override
     public ListingDTO close(UUID listingId, UUID sellerId) {
-        Listing l = listingRepo.findById(listingId).orElseThrow();
-        if (!l.getSeller().getId().equals(sellerId))
+        Listing l = listingRepo.findById(listingId)
+                .orElseThrow(() -> new RuntimeException("Listing not found"));
+
+        if (!l.getItem().getOwner().getId().equals(sellerId))
             throw new RuntimeException("Not your listing");
 
+        if (l.getStatus() != ListingStatus.ACTIVE)
+            throw new RuntimeException("Already closed");
+
         l.setStatus(ListingStatus.CLOSED);
-        l.getItem().setStatus(ItemStatus.SOLD);
-        // Optionally create or link to Transaction here
+        l.setEndDate(Instant.now());
+        l.getItem().setStatus(ItemStatus.DRAFT);
 
-        return map(l);
+        return toDto(l);
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public List<ListingDTO> listActive() {
-        return listingRepo.findByStatus(ListingStatus.ACTIVE)
+        return listingRepo
+                .findByStatus(ListingStatus.ACTIVE, Pageable.unpaged())
                 .stream()
-                .map(this::map)
-                .collect(Collectors.toList());
+                .map(ListingServiceImpl::toDto)
+                .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ListingDTO get(UUID id) {
-        return listingRepo.findById(id).map(this::map)
+        return listingRepo.findById(id)
+                .map(ListingServiceImpl::toDto)
                 .orElseThrow(() -> new RuntimeException("Listing not found"));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ListingDTO> feed(ListingStatus status, String search, Pageable pageable) {
+
+        // Normalise params
+        ListingStatus st = status == null ? ListingStatus.ACTIVE : status;
+        String query      = (search == null ? "" : search).trim();
+
+        Page<Listing> page = query.isBlank()
+                ? listingRepo.findByStatus(st, pageable)
+                : listingRepo.findByStatusAndItem_TitleContainingIgnoreCaseOrStatusAndItem_DescriptionContainingIgnoreCase(
+                st, query,
+                st, query,
+                pageable);
+
+        return page.map(ListingServiceImpl::toDto);
+    }
+
 }

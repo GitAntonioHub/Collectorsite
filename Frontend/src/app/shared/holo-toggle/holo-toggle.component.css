@@ -1,0 +1,11 @@
+div {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 200ms;
+  background: #0f0;   /* running = green */
+}
+div:not(.on) {
+  background: #f00;   /* paused  = red  */
+}

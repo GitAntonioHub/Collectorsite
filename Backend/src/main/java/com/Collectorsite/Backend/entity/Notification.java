@@ -19,6 +19,7 @@ public class Notification {
     private String type;
 
     @Lob
+    @Column(columnDefinition = "text")
     private String payloadJson;
 
     @Builder.Default
