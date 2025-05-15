@@ -4,6 +4,13 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+  sub: string;
+  roles: string[];
+  exp: number;
+}
 
 /**
  * Small reactive store that holds the current JWT token.
@@ -49,5 +56,21 @@ export class AuthStore {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  hasRole(role: string): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      return decoded.roles.includes(role);
+    } catch {
+      return false;
+    }
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('ROLE_ADMIN');
   }
 }
