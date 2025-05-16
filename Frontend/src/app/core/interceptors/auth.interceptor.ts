@@ -1,40 +1,36 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
 import { AuthStore } from '../state/auth.store';
+import { Router } from '@angular/router';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  constructor(
-    private router: Router,
-    private authStore: AuthStore
-  ) {}
+export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+  const token = authStore.token;
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authStore.getToken();
-    
-    if (token) {
-      request = request.clone({
-        setHeaders: { Authorization: `Bearer ${token}` }
-      });
-    }
+  // Don't add token for auth endpoints
+  if (req.url.includes('/auth/')) {
+    return next(req);
+  }
 
-    return next.handle(request).pipe(
+  // Clone the request and add the authorization header if token exists
+  if (token) {
+    const authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return next(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          this.authStore.clear();
-          this.router.navigate(['/auth/login']);
+        if (error.status === 401 || error.status === 403) {
+          authStore.clearAuth();
+          router.navigate(['/login']);
         }
         return throwError(() => error);
       })
     );
   }
-}
+
+  return next(req);
+};

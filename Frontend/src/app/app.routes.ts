@@ -14,13 +14,20 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./auth/register.component').then(m => m.RegisterComponent)
   },
+  {
+    path: 'listings',
+    loadChildren: () => import('./listings/listings.routes').then(m => m.routes)
+  },
   { 
     path: 'items',
-    loadChildren: () => import('./items/items.routes').then(m => m.routes)
+    loadChildren: () => import('./items/items.routes').then(m => m.routes),
+    canActivate: [authGuard]
   },
   { 
     path: 'trade',
-    loadChildren: () => import('./trade/trade.routes').then(m => m.routes)
+    loadChildren: () => import('./trade/trade.routes').then(m => m.TRADE_ROUTES),
+    canActivate: [authGuard],
+    title: 'Trade Items'
   },
   { 
     path: 'admin',
@@ -34,7 +41,7 @@ export const routes: Routes = [
   },
   {
     path: 'settings',
-    loadComponent: () => import('./profile/settings.component').then(m => m.SettingsComponent),
+    loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
     canActivate: [authGuard]
   },
   { 

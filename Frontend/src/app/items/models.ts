@@ -2,6 +2,10 @@ export interface ItemDTO {
   id: string;
   title: string;
   description: string;
+  condition?: string;
+  year?: number;
+  estimatedValue?: number;
+  status?: string;
 }
 
 export interface ItemImage {
@@ -14,4 +18,4 @@ export interface ItemDocument {
   id: string;
   filePath: string;
   type: string;
-}
+} 

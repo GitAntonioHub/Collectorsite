@@ -8,4 +8,5 @@ public interface ItemService {
     ItemDTO create(ItemDTO dto, UUID ownerId);
     ItemDTO get(UUID id);
     List<ItemDTO> list();
+    ItemDTO update(ItemDTO dto, UUID ownerId);
 }

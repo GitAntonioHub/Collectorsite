@@ -4,12 +4,17 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
-import { jwtDecode } from 'jwt-decode';
 
-interface JwtPayload {
-  sub: string;
+interface AuthUser {
+  id: string;
+  username: string;
+  email: string;
   roles: string[];
-  exp: number;
+}
+
+interface AuthState {
+  token: string | null;
+  user: AuthUser | null;
 }
 
 /**
@@ -18,53 +23,63 @@ interface JwtPayload {
  */
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
-  private tokenKey = 'auth_token';
+  private readonly tokenKey = 'token';
+  private readonly initialState: AuthState = {
+    token: null,
+    user: null
+  };
+
+  private state = new BehaviorSubject<AuthState>(this.initialState);
   private tokenSubject = new BehaviorSubject<string | null>(null);
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     // Only load from localStorage in browser environment
     if (isPlatformBrowser(this.platformId)) {
-      this.tokenSubject.next(localStorage.getItem(this.tokenKey));
+      const token = localStorage.getItem(this.tokenKey);
+      if (token) {
+        this.tokenSubject.next(token);
+        // You might want to decode the JWT here to get user info
+        // and update the state accordingly
+      }
     }
   }
 
-  private loadToken(): string | null {
-    return isPlatformBrowser(this.platformId) 
+  get token() {
+    return isPlatformBrowser(this.platformId)
       ? localStorage.getItem(this.tokenKey)
-      : null;
+      : this.tokenSubject.value;
   }
 
-  getToken(): string | null {
-    return this.tokenSubject.value;
+  get isAuthenticated() {
+    return !!this.token;
   }
 
-  /** set & persist token */
-  setToken(token: string): void {
+  setAuth(response: { token: string; user: AuthUser }) {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.tokenKey, token);
+      localStorage.setItem(this.tokenKey, response.token);
     }
-    this.tokenSubject.next(token);
+    this.tokenSubject.next(response.token);
+    this.state.next({
+      token: response.token,
+      user: response.user
+    });
   }
 
-  /** clear token and log the user out */
-  clear(): void {
+  clearAuth() {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.tokenKey);
     }
     this.tokenSubject.next(null);
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+    this.state.next(this.initialState);
   }
 
   hasRole(role: string): boolean {
-    const token = this.getToken();
+    const token = this.token;
     if (!token) return false;
     
     try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      return decoded.roles.includes(role);
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.roles?.includes(role) || false;
     } catch {
       return false;
     }

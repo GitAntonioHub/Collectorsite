@@ -1,6 +1,6 @@
 /* src/app/core/api.service.ts */
 import {inject, Injectable} from '@angular/core';
-import {environment} from '../../enviroments/enviroment';
+import {environment} from '../../environments/environment';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {catchError, retry} from 'rxjs/operators';
@@ -13,11 +13,14 @@ export class ApiService {
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
     
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
+    if (error.error?.message) {
+      // Server returned an error message
       errorMessage = error.error.message;
+    } else if (typeof error.error === 'object') {
+      // Handle validation errors
+      const validationErrors = Object.values(error.error).join(', ');
+      errorMessage = `Validation failed: ${validationErrors}`;
     } else {
-      // Server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
     

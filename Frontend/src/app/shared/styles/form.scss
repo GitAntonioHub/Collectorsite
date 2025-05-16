@@ -1,0 +1,398 @@
+// Form Container
+.form-container {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+// Form Title
+.form-title {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'RetroFuture', sans-serif;
+}
+
+// Form Field Container
+.form-field {
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  label {
+    display: block;
+    color: white;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'RetroFuture', sans-serif;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  &.error {
+    input, textarea, select {
+      border-color: #ff4444;
+    }
+  }
+}
+
+// Material Form Field Overrides
+::ng-deep {
+  .mat-mdc-form-field {
+    width: 100%;
+
+    .mdc-text-field {
+      background: rgba(0, 0, 0, 0.3) !important;
+      border-radius: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.2) !important;
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.3) !important;
+      }
+
+      &.mdc-text-field--focused {
+        border-color: #4caf50 !important;
+      }
+    }
+
+    .mdc-floating-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-family: 'RetroFuture', sans-serif;
+    }
+
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      background-color: transparent;
+
+      .mdc-line-ripple::before {
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .mdc-line-ripple::after {
+        border-bottom-color: #4caf50;
+      }
+    }
+
+    input.mat-mdc-input-element {
+      color: white;
+    }
+
+    .mat-mdc-form-field-error {
+      color: #ff4444;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      font-family: 'RetroFuture', sans-serif;
+    }
+  }
+
+  // Select Styling
+  .mat-mdc-select {
+    color: white;
+  }
+
+  .mat-mdc-select-value {
+    color: white;
+  }
+
+  .mat-mdc-select-arrow {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .mat-mdc-select-panel {
+    background: rgba(0, 0, 0, 0.95) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+
+    .mat-mdc-option {
+      color: white;
+      font-family: 'RetroFuture', sans-serif;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &.mat-mdc-option-active {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  // Paginator Overrides
+  .mat-mdc-paginator {
+    background: transparent !important;
+    color: white !important;
+
+    .mdc-button__label {
+      color: white !important;
+    }
+  }
+
+  .mat-mdc-paginator-container {
+    min-height: 56px;
+    padding: 0 8px;
+    color: white !important;
+    font-family: 'RetroFuture', sans-serif !important;
+  }
+
+  .mat-mdc-paginator-page-size {
+    margin-right: 8px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white !important;
+
+    .mat-mdc-select-trigger {
+      color: white !important;
+    }
+  }
+
+  .mat-mdc-paginator-page-size-label {
+    margin: 0 4px;
+    color: white !important;
+    font-family: 'RetroFuture', sans-serif !important;
+  }
+
+  .mat-mdc-paginator-page-size-select {
+    margin: 0 4px;
+    width: 56px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 2px;
+    padding: 4px !important;
+    color: white !important;
+
+    .mdc-text-field__input {
+      color: white !important;
+    }
+  }
+
+  .mat-mdc-paginator-range-label {
+    margin: 0 32px 0 24px;
+    color: white !important;
+    font-family: 'RetroFuture', sans-serif !important;
+  }
+
+  .mat-mdc-paginator-range-actions {
+    button {
+      color: white !important;
+    }
+  }
+
+  .mat-mdc-paginator-navigation-previous,
+  .mat-mdc-paginator-navigation-next,
+  .mat-mdc-paginator-navigation-first,
+  .mat-mdc-paginator-navigation-last {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    margin: 0 4px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &:disabled {
+      border-color: rgba(255, 255, 255, 0.1);
+      opacity: 0.5;
+    }
+
+    .mat-mdc-button-touch-target {
+      color: white !important;
+    }
+  }
+}
+
+// Form Actions
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
+
+  &.space-between {
+    justify-content: space-between;
+  }
+}
+
+// Form Buttons
+.form-button {
+  min-width: 120px;
+  height: 40px;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-family: 'RetroFuture', sans-serif;
+
+  &.primary {
+    background: #4caf50;
+    color: white;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &.secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+
+    &:hover:not(:disabled) {
+      border-color: white;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Form Links
+.form-link {
+  color: #4caf50;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+  font-family: 'RetroFuture', sans-serif;
+
+  &:hover {
+    color: #45a049;
+    text-decoration: underline;
+  }
+}
+
+// Form Divider
+.form-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  font-family: 'RetroFuture', sans-serif;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  span {
+    padding: 0 1rem;
+  }
+}
+
+// Form Helper Text
+.form-helper {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-family: 'RetroFuture', sans-serif;
+}
+
+// Form Grid Layout
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+// Listing Card Styles
+.listing-card {
+  position: relative;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.listing-type {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+// Paginator Styles
+.retro-paginator {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+// Responsive Adjustments
+@media (max-width: 600px) {
+  .form-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    &.space-between {
+      flex-direction: column-reverse;
+    }
+  }
+
+  .form-button {
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+} 

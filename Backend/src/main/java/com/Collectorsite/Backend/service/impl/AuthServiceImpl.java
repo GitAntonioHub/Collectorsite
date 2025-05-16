@@ -9,6 +9,7 @@ import com.Collectorsite.Backend.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.*;
+import java.util.Optional;
 
 @Service @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -39,11 +40,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        AppUser user = userRepo.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Try to find user by username first, then by email if not found
+        Optional<AppUser> userOpt = userRepo.findByUsername(request.getIdentifier());
+        if (userOpt.isEmpty()) {
+            userOpt = userRepo.findByEmail(request.getIdentifier());
+        }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
+        AppUser user = userOpt.orElseThrow(() -> 
+            new RuntimeException("No user found with the provided username or email"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
+        }
 
         return new AuthResponse(jwt.createToken(user.getUsername(), user.getRoles()));
     }
