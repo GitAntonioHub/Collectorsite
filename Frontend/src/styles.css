@@ -6,23 +6,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- global retro background ---------- */
-html, body { height: 100%; }
-
-body {
-  /* full‑viewport cover */
-  background: url('/assets/bg.jpg') center / cover no-repeat fixed;
-  color: #fff;
-  font-family: 'RetroFuture', sans-serif;
+/* ---------- font ---------- */
+@font-face{
+  font-family:'RetroFuture';
+  src:url('/assets/fonts/Retrofuturistic.ttf') format('truetype');
+  font-display:swap;
 }
 
-
-/* ---------- retro button utility ---------- */
-.retro-btn {
-  @apply inline-flex items-center justify-center
-  border-2 border-white bg-white text-black
-  w-32 h-10 text-sm tracking-wide font-retro
-  transition-transform duration-200 select-none;
+/* ---------- base ---------- */
+html,body{height:100%;margin:0;font-family:'RetroFuture',sans-serif;color: #ffffff}
+body{
+  background:url('/assets/bg.jpg') center/cover no-repeat fixed;
 }
-.retro-btn:hover { @apply -translate-y-0.5 shadow-lg; }
-.font-retro { font-family: 'RetroFuture', sans-serif; }
+body::before{content:'';position:fixed;inset:0;z-index:-1}
+
+/* ---------- holograms ---------- */
+@keyframes spinY{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
+.holo{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:400px;
+  height:400px;
+  opacity:.85;
+  animation:spinY 12s linear infinite;
+  transition: all 0.3s ease;
+}
+.holo-left{left:15%}
+.holo-right{right:15%;animation-direction:reverse}
+
+/* ---------- nav & footer buttons ---------- */
+.retro-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:8rem;
+  height:2.5rem;
+  border:2px solid #fff;
+  background: #000000;
+  color: #ffffff;
+  text-decoration:none;
+  text-transform:uppercase;
+  font-size:1.25rem;
+  letter-spacing:.05em;
+  transition: .2s all;
+}
+.retro-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 8px rgba(0,0,0,.4);
+  background: rgba(255,255,255,0.1);
+}
+
+/* header & footer containers */
+header,footer{
+  position:fixed;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:center;
+  z-index:5;
+  padding: 1rem;
+}
+header{top:0}
+footer{bottom:0}
+
+/* page placeholder */
+main{
+  padding:5rem 1rem 4rem;
+  text-align:center;
+  font-size: 1.25rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

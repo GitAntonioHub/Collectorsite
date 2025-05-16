@@ -8,11 +8,11 @@ import { CommonModule } from '@angular/common';
   template: `
     <!-- footer -->
     <footer>
-    <span class="retro-btn" style="width:auto;padding:0 2rem">
-      © <span id="yr"></span> Collector‑Site
-    </span>
+  <span class="retro-btn" style="width:auto;padding:0 2rem">
+    © <span id="yr"></span> Collector‑Site
+  </span>
     </footer>
-
+    <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
   `
 })
 export class SharedFooterComponent {

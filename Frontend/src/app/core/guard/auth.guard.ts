@@ -1,9 +1,15 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { AuthStore } from '../state/auth.store';           // << correct path
+import { Router } from '@angular/router';
+import { AuthStore } from '../state/auth.store';
 
 /** Redirects to /login if no JWT token is present. */
-export const authGuard: CanActivateFn = (): boolean | UrlTree => {
-  const token = inject(AuthStore).token();
-  return token ? true : inject(Router).createUrlTree(['/login']);
+export const authGuard = () => {
+  const router = inject(Router);
+  const authStore = inject(AuthStore);
+
+  if (authStore.isAuthenticated) {
+    return true;
+  }
+
+  return router.parseUrl('/login');
 };

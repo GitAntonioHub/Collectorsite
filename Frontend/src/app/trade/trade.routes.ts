@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
-import { TradeOffersComponent } from './trade-offers.component';
+import { TradeViewComponent } from './trade-view.component';
 
-export const routes: Routes = [
-  { path: '', component: TradeOffersComponent }
+export const TRADE_ROUTES: Routes = [
+  {
+    path: '',
+    component: TradeViewComponent,
+    title: 'Available Items for Trade'
+  }
 ];

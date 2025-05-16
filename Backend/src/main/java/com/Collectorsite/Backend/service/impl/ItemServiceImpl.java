@@ -50,7 +50,6 @@ public class ItemServiceImpl implements ItemService {
                 .build());
 
         return map(item);
-
     }
 
     @Override
@@ -61,5 +60,26 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDTO> list() {
         return itemRepo.findAll().stream().map(this::map).collect(Collectors.toList());
+    }
+
+    @Override
+    public ItemDTO update(ItemDTO dto, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(dto.getId())
+            .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        if (!item.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Not authorized to update this item");
+        }
+
+        // Update mutable fields
+        item.setTitle(dto.getTitle());
+        item.setDescription(dto.getDescription());
+        item.setCondition(dto.getCondition());
+        item.setYear(dto.getYear());
+        item.setEstimatedValue(dto.getEstimatedValue());
+        item.setStatus(dto.getStatus());
+
+        itemRepo.save(item);
+        return map(item);
     }
 }

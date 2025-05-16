@@ -23,6 +23,7 @@ public class CollectorItem {
     private String title;
 
     @Lob
+    @Column(columnDefinition = "text")
     private String description;
 
     @Enumerated(EnumType.STRING)
