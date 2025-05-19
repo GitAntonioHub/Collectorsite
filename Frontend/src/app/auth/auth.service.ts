@@ -30,7 +30,7 @@ interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = environment.api;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,

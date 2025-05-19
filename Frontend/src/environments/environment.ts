@@ -1,3 +1,4 @@
 export const environment = {
-  api: 'http://localhost:8080'
+  production: false,
+  apiUrl: 'http://localhost:8080/api'  // Updated to use port 8080 to match backend configuration
 };

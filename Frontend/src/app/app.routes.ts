@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guard/auth.guard';
+import { ITEMS_ROUTES } from './items/items.routes';
 
 export const routes: Routes = [
   { 
@@ -18,10 +19,9 @@ export const routes: Routes = [
     path: 'listings',
     loadChildren: () => import('./listings/listings.routes').then(m => m.routes)
   },
-  { 
+  {
     path: 'items',
-    loadChildren: () => import('./items/items.routes').then(m => m.routes),
-    canActivate: [authGuard]
+    children: ITEMS_ROUTES
   },
   { 
     path: 'trade',

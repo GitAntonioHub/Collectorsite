@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
 import { Observable, catchError, throwError } from 'rxjs';
-import { ItemDTO } from './models';
+import { ItemDTO, Item } from './models';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
@@ -43,6 +43,17 @@ export class ItemService {
 
   makeListable(itemId: string): Observable<ItemDTO> {
     return this.api.post<ItemDTO>(`/items/${itemId}/make-listable`, {})
+      .pipe(catchError(this.handleError));
+  }
+
+  getItems(search: string = '', page: number = 0, size: number = 12): Observable<any> {
+    const params = {
+      q: search,
+      page: page.toString(),
+      size: size.toString(),
+      status: 'ACTIVE'
+    };
+    return this.api.get<any>('/listings', params)
       .pipe(catchError(this.handleError));
   }
 }
