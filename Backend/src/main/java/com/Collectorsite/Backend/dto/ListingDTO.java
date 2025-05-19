@@ -16,4 +16,12 @@ public class ListingDTO {
     private Instant startDate;
     private Instant endDate;
     private ListingStatus status;
+    
+    // Item details
+    private String title;
+    private String description;
+    private String imageUrl;
+    private ItemCondition condition;
+    private Integer year;
+    private Double estimatedValue;
 }

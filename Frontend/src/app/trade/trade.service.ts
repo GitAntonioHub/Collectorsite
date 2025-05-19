@@ -17,7 +17,7 @@ export interface TradableItem {
   providedIn: 'root'
 })
 export class TradeService {
-  private baseUrl = environment.api + '/trades';
+  private baseUrl = environment.apiUrl + '/trades';
 
   constructor(private http: HttpClient) {}
 

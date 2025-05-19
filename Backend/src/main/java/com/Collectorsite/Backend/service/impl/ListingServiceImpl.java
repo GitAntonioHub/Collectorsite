@@ -4,6 +4,7 @@ import com.Collectorsite.Backend.dto.CreateListingDTO;
 import com.Collectorsite.Backend.dto.ListingDTO;
 import com.Collectorsite.Backend.entity.CollectorItem;
 import com.Collectorsite.Backend.entity.Listing;
+import com.Collectorsite.Backend.entity.ItemImage;
 import com.Collectorsite.Backend.enums.ItemStatus;
 import com.Collectorsite.Backend.enums.ListingStatus;
 import com.Collectorsite.Backend.enums.ListingType;
@@ -34,15 +35,29 @@ public class ListingServiceImpl implements ListingService {
     /* ---------- helpers ---------- */
 
     private static ListingDTO toDto(Listing l) {
+        CollectorItem item = l.getItem();
+        String imageUrl = item.getImages().stream()
+                .filter(ItemImage::getIsPrimary)
+                .findFirst()
+                .map(ItemImage::getUrl)
+                .orElse(null);
+
         return ListingDTO.builder()
                 .id(l.getId())
-                .itemId(l.getItem().getId())
+                .itemId(item.getId())
                 .listingType(l.getListingType())
                 .price(l.getPrice())
                 .currency(l.getCurrency())
                 .status(l.getStatus())
                 .startDate(l.getStartDate())
                 .endDate(l.getEndDate())
+                // Item details
+                .title(item.getTitle())
+                .description(item.getDescription())
+                .imageUrl(imageUrl)
+                .condition(item.getCondition())
+                .year(item.getYear())
+                .estimatedValue(item.getEstimatedValue())
                 .build();
     }
 

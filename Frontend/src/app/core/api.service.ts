@@ -8,7 +8,7 @@ import {catchError, retry} from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
-  private base = environment.api;
+  private base = environment.apiUrl;
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
