@@ -1,3 +1,4 @@
 export const environment = {
-  api: 'https://api.collectorsite.com'
+  production: true,
+  apiUrl: 'https://api.collectorsite.com'  // Production URL without /api prefix
 };

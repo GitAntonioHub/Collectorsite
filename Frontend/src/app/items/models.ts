@@ -6,6 +6,8 @@ export interface ItemDTO {
   year?: number;
   estimatedValue?: number;
   status?: string;
+  images?: ItemImage[];
+  documents?: ItemDocument[];
 }
 
 export interface ItemImage {

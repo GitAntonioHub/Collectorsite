@@ -64,21 +64,46 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDTO update(ItemDTO dto, UUID ownerId) {
-        CollectorItem item = itemRepo.findById(dto.getId())
-            .orElseThrow(() -> new RuntimeException("Item not found"));
-
+        CollectorItem item = itemRepo.findById(dto.getId()).orElseThrow();
+        
         if (!item.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Not authorized to update this item");
+            throw new RuntimeException("You are not authorized to update this item");
         }
 
-        // Update mutable fields
         item.setTitle(dto.getTitle());
         item.setDescription(dto.getDescription());
         item.setCondition(dto.getCondition());
         item.setYear(dto.getYear());
         item.setEstimatedValue(dto.getEstimatedValue());
-        item.setStatus(dto.getStatus());
 
+        itemRepo.save(item);
+        return map(item);
+    }
+
+    @Override
+    public void delete(UUID id, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        
+        if (!item.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("You are not authorized to delete this item");
+        }
+
+        itemRepo.delete(item);
+    }
+
+    @Override
+    public ItemDTO makeListable(UUID id, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        
+        if (!item.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("You are not authorized to modify this item");
+        }
+
+        if (!item.getStatus().equals(ItemStatus.DRAFT)) {
+            throw new RuntimeException("Item must be in DRAFT status to make it listable");
+        }
+
+        item.setStatus(ItemStatus.AVAILABLE);
         itemRepo.save(item);
         return map(item);
     }

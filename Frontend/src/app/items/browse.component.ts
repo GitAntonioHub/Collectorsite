@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemService } from './item.service';
+import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 interface Listing {
   id: string;
@@ -19,12 +21,13 @@ interface Listing {
   condition: string;
   year: number | null;
   estimatedValue: number | null;
+  category?: string;
 }
 
 @Component({
   selector: 'app-browse',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="flex items-center gap-4 mb-8">
@@ -36,16 +39,14 @@ interface Listing {
             placeholder="Search items..."
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <span class="absolute right-3 top-2.5 text-gray-400">
-            <i class="fas fa-search"></i>
-          </span>
+          <mat-icon class="absolute right-3 top-2.5 text-gray-400">search</mat-icon>
         </div>
         
         <button
           (click)="toggleFilters()"
           class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <i class="fas fa-filter mr-2"></i>
+          <mat-icon class="mr-2">filter_list</mat-icon>
           Filters
         </button>
       </div>
@@ -103,30 +104,38 @@ interface Listing {
 
       <!-- Items grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div *ngFor="let listing of listings" class="bg-white rounded-lg shadow-md overflow-hidden">
-          <img [src]="listing.imageUrl || 'assets/placeholder.jpg'" [alt]="listing.title" class="w-full h-48 object-cover"/>
+        <div *ngFor="let listing of listings" 
+             class="bg-black/50 border-2 border-white overflow-hidden cursor-pointer hover:bg-black/70 transition-all"
+             (click)="viewDetails(listing)">
+          <div class="aspect-square bg-black/30 border-b-2 border-white overflow-hidden">
+            <img [src]="listing.imageUrl || 'assets/placeholder.jpg'" 
+                 [alt]="listing.title" 
+                 class="w-full h-full object-cover"/>
+          </div>
           <div class="p-4">
             <div class="flex justify-between items-start mb-2">
-              <h3 class="text-lg font-semibold">{{listing.title}}</h3>
-              <span class="text-sm text-gray-500">{{listing.condition}}</span>
+              <h3 class="text-lg font-semibold text-white font-retrofuture">{{listing.title}}</h3>
+              <span class="text-sm text-white/70">{{listing.condition}}</span>
             </div>
-            <p class="text-gray-600 mb-2 line-clamp-2">{{listing.description}}</p>
+            <p class="text-white/90 mb-2 line-clamp-2">{{listing.description}}</p>
             <div class="flex justify-between items-center">
               <div class="flex flex-col">
-                <span class="text-blue-500 font-bold">{{listing.price | currency:listing.currency}}</span>
-                <span class="text-sm text-gray-500" *ngIf="listing.estimatedValue">
+                <span class="text-cyan-400 font-bold">{{listing.price | currency:listing.currency}}</span>
+                <span class="text-sm text-white/70" *ngIf="listing.estimatedValue">
                   Est. Value: {{listing.estimatedValue | currency:listing.currency}}
                 </span>
               </div>
-              <button
-                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                (click)="viewDetails(listing)"
-              >
-                View Details
-              </button>
+              <span class="text-white/70 text-sm border border-white/70 px-2 py-1 rounded">
+                {{listing.listingType}}
+              </span>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="listings.length === 0" class="text-center py-12">
+        <p class="text-white text-xl font-retrofuture">No items found</p>
       </div>
 
       <!-- Pagination -->
@@ -134,9 +143,10 @@ interface Listing {
         <button
           *ngFor="let page of getPageNumbers()"
           (click)="goToPage(page)"
-          [class.bg-blue-500]="currentPage === page"
+          [class.bg-cyan-500]="currentPage === page"
           [class.text-white]="currentPage === page"
-          class="px-3 py-1 rounded border hover:bg-blue-100"
+          [class.border-cyan-500]="currentPage === page"
+          class="px-3 py-1 rounded border-2 border-white text-white hover:bg-black/50"
         >
           {{page + 1}}
         </button>
@@ -147,10 +157,13 @@ interface Listing {
     :host {
       display: block;
     }
+    .font-retrofuture {
+      font-family: 'RetroFuture', sans-serif !important;
+    }
   `]
 })
 export class BrowseComponent implements OnInit {
-  listings: any[] = [];
+  listings: Listing[] = [];
   searchQuery: string = '';
   showFilters: boolean = false;
   categories: string[] = ['Electronics', 'Clothing', 'Books', 'Sports', 'Other'];
@@ -165,7 +178,10 @@ export class BrowseComponent implements OnInit {
     sortBy: 'newest'
   };
 
-  constructor(private itemService: ItemService) {}
+  constructor(
+    private itemService: ItemService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadItems();
@@ -179,13 +195,13 @@ export class BrowseComponent implements OnInit {
     });
   }
 
-  toggleFilters() {
-    this.showFilters = !this.showFilters;
-  }
-
   onSearch() {
     this.currentPage = 0;
     this.loadItems();
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 
   applyFilters() {
@@ -223,9 +239,8 @@ export class BrowseComponent implements OnInit {
     this.listings = filtered;
   }
 
-  viewDetails(listing: any) {
-    // TODO: Implement navigation to listing details
-    console.log('Viewing details for listing:', listing);
+  viewDetails(listing: Listing) {
+    this.router.navigate(['/items', listing.itemId]);
   }
 
   goToPage(page: number) {

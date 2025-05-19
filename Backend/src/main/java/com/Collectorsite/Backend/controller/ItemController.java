@@ -48,19 +48,32 @@ public class ItemController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ItemDTO> update(@PathVariable UUID id, @Valid @RequestBody ItemDTO dto, Principal principal) {
+        try {
+            UUID ownerId = UUID.fromString(principal.getName());
+            return ResponseEntity.ok(service.update(dto, ownerId));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update item: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id, Principal principal) {
+        try {
+            UUID ownerId = UUID.fromString(principal.getName());
+            service.delete(id, ownerId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete item: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/{id}/make-listable")
     public ResponseEntity<ItemDTO> makeListable(@PathVariable UUID id, Principal principal) {
         try {
             UUID ownerId = UUID.fromString(principal.getName());
-            ItemDTO item = service.get(id);
-            
-            if (!item.getStatus().equals(ItemStatus.DRAFT)) {
-                throw new RuntimeException("Item must be in DRAFT status to make it listable");
-            }
-            
-            // Update the item status to AVAILABLE
-            item.setStatus(ItemStatus.AVAILABLE);
-            return ResponseEntity.ok(service.update(item, ownerId));
+            return ResponseEntity.ok(service.makeListable(id, ownerId));
         } catch (Exception e) {
             throw new RuntimeException("Failed to make item listable: " + e.getMessage());
         }

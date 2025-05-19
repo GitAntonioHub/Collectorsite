@@ -27,22 +27,32 @@ export class ItemService {
   }
 
   myItems(): Observable<ItemDTO[]> {
-    return this.api.get<ItemDTO[]>('/items')
+    return this.api.get<ItemDTO[]>('/api/items')
       .pipe(catchError(this.handleError));
   }
 
-  create(body: Partial<ItemDTO>): Observable<ItemDTO> {
-    return this.api.post<ItemDTO>('/items', body)
+  create(item: any): Observable<ItemDTO> {
+    return this.api.post<ItemDTO>('/api/items', item)
       .pipe(catchError(this.handleError));
   }
 
-  one(id: string): Observable<ItemDTO> {
-    return this.api.get<ItemDTO>(`/items/${id}`)
+  update(id: string, item: any): Observable<ItemDTO> {
+    return this.api.put<ItemDTO>(`/api/items/${id}`, item)
+      .pipe(catchError(this.handleError));
+  }
+
+  delete(id: string): Observable<void> {
+    return this.api.delete<void>(`/api/items/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  get(id: string): Observable<ItemDTO> {
+    return this.api.get<ItemDTO>(`/api/items/${id}`)
       .pipe(catchError(this.handleError));
   }
 
   makeListable(itemId: string): Observable<ItemDTO> {
-    return this.api.post<ItemDTO>(`/items/${itemId}/make-listable`, {})
+    return this.api.post<ItemDTO>(`/api/items/${itemId}/make-listable`, {})
       .pipe(catchError(this.handleError));
   }
 
@@ -53,7 +63,7 @@ export class ItemService {
       size: size.toString(),
       status: 'ACTIVE'
     };
-    return this.api.get<any>('/listings', params)
+    return this.api.get<any>('/api/listings', params)
       .pipe(catchError(this.handleError));
   }
 }

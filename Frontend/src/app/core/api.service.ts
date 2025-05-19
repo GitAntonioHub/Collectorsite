@@ -1,7 +1,7 @@
 /* src/app/core/api.service.ts */
 import {inject, Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpParams} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {catchError, retry} from 'rxjs/operators';
 
@@ -27,27 +27,36 @@ export class ApiService {
     return throwError(() => errorMessage);
   }
 
-  get = <T>(u: string, p?: any): Observable<T> => 
-    this.http.get<T>(this.base + u, { params: p }).pipe(
-      retry(1),
-      catchError(this.handleError)
-    );
+  private createUrl(path: string): string {
+    return `${this.base}${path}`;
+  }
 
-  post = <T>(u: string, b: any): Observable<T> => 
-    this.http.post<T>(this.base + u, b).pipe(
+  get<T>(path: string, params: any = {}): Observable<T> {
+    const httpParams = new HttpParams({ fromObject: params });
+    return this.http.get<T>(this.createUrl(path), { params: httpParams }).pipe(
       retry(1),
       catchError(this.handleError)
     );
+  }
 
-  put = <T>(u: string, b?: any): Observable<T> => 
-    this.http.put<T>(this.base + u, b).pipe(
+  post<T>(path: string, body: any): Observable<T> {
+    return this.http.post<T>(this.createUrl(path), body).pipe(
       retry(1),
       catchError(this.handleError)
     );
+  }
 
-  del = <T>(u: string): Observable<T> => 
-    this.http.delete<T>(this.base + u).pipe(
+  put<T>(path: string, body: any): Observable<T> {
+    return this.http.put<T>(this.createUrl(path), body).pipe(
       retry(1),
       catchError(this.handleError)
     );
+  }
+
+  delete<T>(path: string): Observable<T> {
+    return this.http.delete<T>(this.createUrl(path)).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
+  }
 }

@@ -286,6 +286,18 @@
     }
   }
 
+  &.danger {
+    background: #ff4444;
+    color: white;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: #ff3333;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -395,4 +407,9 @@
   .form-grid {
     grid-template-columns: 1fr;
   }
+}
+
+// Error Snackbar
+.error-snackbar {
+  @apply bg-red-500 text-white;
 } 

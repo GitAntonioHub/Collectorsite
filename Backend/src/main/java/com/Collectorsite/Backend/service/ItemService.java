@@ -9,4 +9,6 @@ public interface ItemService {
     ItemDTO get(UUID id);
     List<ItemDTO> list();
     ItemDTO update(ItemDTO dto, UUID ownerId);
+    void delete(UUID id, UUID ownerId);
+    ItemDTO makeListable(UUID id, UUID ownerId);
 }
