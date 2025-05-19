@@ -1,5 +1,5 @@
 package com.Collectorsite.Backend.enums;
 
 public enum ListingStatus {
-    ACTIVE, CLOSED, CANCELLED
+    ACTIVE, CLOSED, CANCELLED, SOLD, TRADED
 }

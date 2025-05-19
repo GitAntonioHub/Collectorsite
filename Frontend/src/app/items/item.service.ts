@@ -9,21 +9,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class ItemService {
   private api = inject(ApiService);
 
-  private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'An error occurred';
-    
-    if (error.error?.message) {
-      // Server returned an error message
-      errorMessage = error.error.message;
-    } else if (typeof error.error === 'object') {
-      // Handle validation errors
-      const validationErrors = Object.values(error.error).join(', ');
-      errorMessage = `Validation failed: ${validationErrors}`;
-    } else {
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-    }
-
-    return throwError(() => new Error(errorMessage));
+  private handleError(error: any): Observable<never> {
+    console.error('An error occurred:', error);
+    return throwError(() => error);
   }
 
   myItems(): Observable<ItemDTO[]> {
@@ -60,8 +48,7 @@ export class ItemService {
     const params = {
       q: search,
       page: page.toString(),
-      size: size.toString(),
-      status: 'ACTIVE'
+      size: size.toString()
     };
     return this.api.get<any>('/api/listings', params)
       .pipe(catchError(this.handleError));

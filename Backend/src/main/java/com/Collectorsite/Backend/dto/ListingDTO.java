@@ -16,6 +16,7 @@ public class ListingDTO {
     private Instant startDate;
     private Instant endDate;
     private ListingStatus status;
+    private OwnerDTO owner;
     
     // Item details
     private String title;

@@ -301,7 +301,7 @@ export class MyItemsComponent implements OnInit {
   }
 
   deleteItem(item: ItemDTO) {
-    if (confirm('Are you sure you want to delete this item?')) {
+    if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
       this.itemSvc.delete(item.id).subscribe({
         next: () => {
           this.load();
@@ -312,7 +312,11 @@ export class MyItemsComponent implements OnInit {
           });
         },
         error: (err) => {
-          this.snackBar.open(err.message, 'Close', {
+          let message = 'Failed to delete item';
+          if (err.message.includes('not authorized')) {
+            message = 'You can only delete your own items';
+          }
+          this.snackBar.open(message, 'Close', {
             duration: 5000,
             horizontalPosition: 'center',
             verticalPosition: 'bottom',

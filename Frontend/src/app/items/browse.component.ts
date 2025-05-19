@@ -24,6 +24,27 @@ interface Listing {
   category?: string;
 }
 
+interface ListingResponse {
+  content: {
+    id: string;
+    itemId: string;
+    listingType: 'SALE' | 'AUCTION';
+    price: number;
+    currency?: string;
+    startDate: string;
+    endDate: string;
+    status: 'ACTIVE' | 'CLOSED' | 'CANCELLED';
+    title: string;
+    description: string;
+    images?: { url: string }[];
+    condition: string;
+    year: number | null;
+    estimatedValue: number | null;
+    category?: string;
+  }[];
+  totalPages: number;
+}
+
 @Component({
   selector: 'app-browse',
   standalone: true,
@@ -188,10 +209,30 @@ export class BrowseComponent implements OnInit {
   }
 
   loadItems() {
-    this.itemService.getItems(this.searchQuery, this.currentPage, this.pageSize).subscribe(response => {
-      this.listings = response.content;
-      this.totalPages = response.totalPages;
-      this.applyFilters();
+    this.itemService.getItems(this.searchQuery, this.currentPage, this.pageSize).subscribe({
+      next: (response: ListingResponse) => {
+        this.listings = response.content.map(item => ({
+          id: item.id,
+          itemId: item.itemId,
+          listingType: item.listingType,
+          price: item.price,
+          currency: item.currency || 'USD',
+          startDate: item.startDate,
+          endDate: item.endDate,
+          status: item.status,
+          title: item.title,
+          description: item.description,
+          imageUrl: item.images?.[0]?.url || null,
+          condition: item.condition,
+          year: item.year,
+          estimatedValue: item.estimatedValue,
+          category: item.category
+        }));
+        this.totalPages = response.totalPages;
+      },
+      error: (error) => {
+        console.error('Error loading items:', error);
+      }
     });
   }
 
