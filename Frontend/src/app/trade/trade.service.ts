@@ -1,12 +1,35 @@
 /* src/app/trade/trade.service.ts */
-import { Injectable, inject } from '@angular/core';
-import { ApiService } from '../core/api.service';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { TradeOffer } from './models';
 
-@Injectable({ providedIn: 'root' })
+export interface TradableItem {
+  id: string;
+  title: string;
+  description: string;
+  estimatedValue: number;
+  images: string[];
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class TradeService {
-  private api = inject(ApiService);
+  private baseUrl = environment.api + '/trades';
 
-  propose(payload: any)       { return this.api.post('/trade/propose', payload); }
-  accept(offerId: string)     { return this.api.put(`/trade/${offerId}/ACCEPTED`); }
-  decline(offerId: string)    { return this.api.put(`/trade/${offerId}/DECLINED`); }
+  constructor(private http: HttpClient) {}
+
+  getAvailableItems(): Observable<TradableItem[]> {
+    return this.http.get<TradableItem[]>(`${this.baseUrl}/available-items`);
+  }
+
+  createTradeOffer(offer: Partial<TradeOffer>): Observable<TradeOffer> {
+    return this.http.post<TradeOffer>(`${this.baseUrl}/offers`, offer);
+  }
+
+  getMyTradeOffers(): Observable<TradeOffer[]> {
+    return this.http.get<TradeOffer[]>(`${this.baseUrl}/my-offers`);
+  }
 }

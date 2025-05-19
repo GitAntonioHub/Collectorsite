@@ -14,8 +14,7 @@
 }
 
 /* ---------- base ---------- */
-html,body{height:100%;margin:0;font-family:'RetroFuture',sans-serif;color: #ffffff
-}
+html,body{height:100%;margin:0;font-family:'RetroFuture',sans-serif;color: #ffffff}
 body{
   background:url('/assets/bg.jpg') center/cover no-repeat fixed;
 }
@@ -23,23 +22,62 @@ body::before{content:'';position:fixed;inset:0;z-index:-1}
 
 /* ---------- holograms ---------- */
 @keyframes spinY{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
-.holo{position:absolute;top:40%;transform:translateY(-40%);
-  width:300px;height:300px;opacity:.85;animation:spinY 12s linear infinite}
-.holo-left{left:1rem}.holo-right{right:1rem;animation-direction:reverse}
+.holo{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:400px;
+  height:400px;
+  opacity:.85;
+  animation:spinY 12s linear infinite;
+  transition: all 0.3s ease;
+}
+.holo-left{left:15%}
+.holo-right{right:15%;animation-direction:reverse}
 
 /* ---------- nav & footer buttons ---------- */
 .retro-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:8rem;height:2.5rem;
-  border:2px solid #fff;background: #000000;color: #ffffff;
-  text-decoration:none;text-transform:uppercase;font-size:1.25rem;
-  letter-spacing:.05em;transition:.2s transform;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:8rem;
+  height:2.5rem;
+  border:2px solid #fff;
+  background: #000000;
+  color: #ffffff;
+  text-decoration:none;
+  text-transform:uppercase;
+  font-size:1.25rem;
+  letter-spacing:.05em;
+  transition: .2s all;
 }
-.retro-btn:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.4)}
+.retro-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 8px rgba(0,0,0,.4);
+  background: rgba(255,255,255,0.1);
+}
 
 /* header & footer containers */
-header,footer{position:fixed;left:0;right:0;display:flex;justify-content:center;z-index:5}
-header{top:1rem}footer{bottom:1rem}
+header,footer{
+  position:fixed;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:center;
+  z-index:5;
+  padding: 1rem;
+}
+header{top:0}
+footer{bottom:0}
 
 /* page placeholder */
-main{padding:5rem 1rem 4rem;text-align:center;font-size: 1.25rem;}
+main{
+  padding:5rem 1rem 4rem;
+  text-align:center;
+  font-size: 1.25rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,14 +1,48 @@
 /* src/app/items/item.service.ts */
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { ItemDTO } from './models';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ItemService {
   private api = inject(ApiService);
 
-  myItems(): Observable<ItemDTO[]>  { return this.api.get<ItemDTO[]>('/items'); }
-  create(body: Partial<ItemDTO>)    { return this.api.post<ItemDTO>('/items', body); }
-  one(id: string)                   { return this.api.get<ItemDTO>(`/items/${id}`); }
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An error occurred';
+    
+    if (error.error?.message) {
+      // Server returned an error message
+      errorMessage = error.error.message;
+    } else if (typeof error.error === 'object') {
+      // Handle validation errors
+      const validationErrors = Object.values(error.error).join(', ');
+      errorMessage = `Validation failed: ${validationErrors}`;
+    } else {
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+
+    return throwError(() => new Error(errorMessage));
+  }
+
+  myItems(): Observable<ItemDTO[]> {
+    return this.api.get<ItemDTO[]>('/items')
+      .pipe(catchError(this.handleError));
+  }
+
+  create(body: Partial<ItemDTO>): Observable<ItemDTO> {
+    return this.api.post<ItemDTO>('/items', body)
+      .pipe(catchError(this.handleError));
+  }
+
+  one(id: string): Observable<ItemDTO> {
+    return this.api.get<ItemDTO>(`/items/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  makeListable(itemId: string): Observable<ItemDTO> {
+    return this.api.post<ItemDTO>(`/items/${itemId}/make-listable`, {})
+      .pipe(catchError(this.handleError));
+  }
 }

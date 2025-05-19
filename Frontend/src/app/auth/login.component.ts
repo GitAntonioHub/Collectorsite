@@ -1,57 +1,104 @@
 /* src/app/auth/login.component.ts */
 import { Component } from '@angular/core';
-import {Router, RouterLink} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from './auth.service';
+import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from './auth.service';
 
 @Component({
-  standalone: true,
   selector: 'app-login',
+  standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatButtonModule, RouterLink
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    RouterLink
   ],
-  template:`
-    <div class=\"flex justify-center items-center h-[calc(100vh-160px)]\">
-      <form [formGroup]=\"fg\" (ngSubmit)=\"submit()\" class=\"w-72 space-y-5\">
-        <mat-form-field appearance=\"fill\" class=\"w-full\">
-          <mat-label>Username</mat-label>
-          <input matInput formControlName=\"u\" required>
-        </mat-form-field>
+  template: `
+    <div class="form-container">
+      <h1 class="form-title">Login</h1>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="form-field">
+          <mat-form-field appearance="fill">
+            <mat-label>Username or Email</mat-label>
+            <input matInput type="text" formControlName="identifier" required>
+            <mat-error *ngIf="loginForm.get('identifier')?.hasError('required')">
+              Username or Email is required
+            </mat-error>
+          </mat-form-field>
+        </div>
 
-        <mat-form-field appearance=\"fill\" class=\"w-full\">
-          <mat-label>Password</mat-label>
-          <input matInput type=\"password\" formControlName=\"p\" required>
-        </mat-form-field>
+        <div class="form-field">
+          <mat-form-field appearance="fill">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+              Password is required
+            </mat-error>
+          </mat-form-field>
+        </div>
 
-        <button mat-raised-button color=\"primary\" class=\"w-full\" [disabled]=\"fg.invalid\">Login</button>
+        <div class="form-actions">
+          <button type="submit" 
+                  class="form-button primary"
+                  [disabled]="loginForm.invalid || isLoading">
+            {{ isLoading ? 'Logging in...' : 'Login' }}
+          </button>
+        </div>
 
-        <p class=\"text-xs text-center\">No account?
-          <a routerLink=\"/register\" class=\"underline\">Register</a></p>
+        <div class="form-divider">
+          <span>OR</span>
+        </div>
+
+        <div class="form-helper">
+          Don't have an account? 
+          <a routerLink="/register" class="form-link">Register here</a>
+        </div>
       </form>
-    </div>`
+    </div>
+  `,
+  styleUrls: ['../shared/styles/form.scss']
 })
 export class LoginComponent {
-  fg: FormGroup;
+  loginForm: FormGroup;
+  hidePassword = true;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
-    private auth: AuthService,
+    private authService: AuthService,
     private router: Router
   ) {
-    this.fg = this.fb.group({
-      u: ['', Validators.required],
-      p: ['', Validators.required]
+    this.loginForm = this.fb.group({
+      identifier: ['', [Validators.required]],
+      password: ['', [Validators.required]]
     });
   }
 
-  submit() {
-    if (this.fg.invalid) return;
-    const { u, p } = this.fg.value;
-    this.auth.login(u, p).subscribe(() => this.router.navigateByUrl('/'));
+  onSubmit() {
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      const { identifier, password } = this.loginForm.value;
+      this.authService.login({ identifier, password }).subscribe({
+        next: () => {
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+          this.isLoading = false;
+        }
+      });
+    }
   }
 }

@@ -1,15 +1,53 @@
 /* src/app/core/api.service.ts */
 import {inject, Injectable} from '@angular/core';
-import {environment} from '../../enviroments/enviroment';
-import {HttpClient} from '@angular/common/http';
+import {environment} from '../../environments/environment';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {catchError, retry} from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
   private base = environment.api;
 
-  get  = <T>(u: string, p?: any) => this.http.get<T>(this.base + u, { params: p });
-  post = <T>(u: string, b: any)  => this.http.post<T>(this.base + u, b);
-  put  = <T>(u: string, b?: any) => this.http.put<T>(this.base + u, b);
-  del  = <T>(u: string)          => this.http.delete<T>(this.base + u);
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An error occurred';
+    
+    if (error.error?.message) {
+      // Server returned an error message
+      errorMessage = error.error.message;
+    } else if (typeof error.error === 'object') {
+      // Handle validation errors
+      const validationErrors = Object.values(error.error).join(', ');
+      errorMessage = `Validation failed: ${validationErrors}`;
+    } else {
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    
+    return throwError(() => errorMessage);
+  }
+
+  get = <T>(u: string, p?: any): Observable<T> => 
+    this.http.get<T>(this.base + u, { params: p }).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
+
+  post = <T>(u: string, b: any): Observable<T> => 
+    this.http.post<T>(this.base + u, b).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
+
+  put = <T>(u: string, b?: any): Observable<T> => 
+    this.http.put<T>(this.base + u, b).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
+
+  del = <T>(u: string): Observable<T> => 
+    this.http.delete<T>(this.base + u).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
 }

@@ -1,0 +1,24 @@
+<div class="trade-container">
+  <h1>Available Items for Trade</h1>
+  
+  <mat-grid-list cols="3" rowHeight="450px" gutterSize="16">
+    <mat-grid-tile *ngFor="let item of availableItems">
+      <mat-card class="item-card">
+        <img mat-card-image [src]="item.images[0] || 'assets/placeholder.png'" 
+             [alt]="item.title"
+             class="item-image">
+        <mat-card-content>
+          <h2>{{ item.title }}</h2>
+          <p>{{ item.description }}</p>
+          <p class="value">Estimated Value: ${{ item.estimatedValue }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="initiateTradeOffer(item)">
+            <mat-icon>swap_horiz</mat-icon>
+            Propose Trade
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div> 
