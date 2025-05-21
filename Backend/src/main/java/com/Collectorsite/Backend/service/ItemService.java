@@ -8,7 +8,17 @@ public interface ItemService {
     ItemDTO create(ItemDTO dto, UUID ownerId);
     ItemDTO get(UUID id);
     List<ItemDTO> list();
-    ItemDTO update(ItemDTO dto, UUID ownerId);
+    ItemDTO update(UUID id, ItemDTO dto, UUID ownerId);
     void delete(UUID id, UUID ownerId);
     ItemDTO makeListable(UUID id, UUID ownerId);
+    
+    /**
+     * Get items by owner ID
+     */
+    List<ItemDTO> getItemsByOwner(UUID ownerId);
+    
+    /**
+     * Verify an item (for admin/verifier)
+     */
+    ItemDTO verifyItem(UUID id);
 }

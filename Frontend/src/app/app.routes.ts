@@ -24,7 +24,7 @@ export const routes: Routes = [
       { path: '', component: ListingsComponent }
     ]
   },
-  {
+  { 
     path: 'items',
     children: ITEMS_ROUTES
   },

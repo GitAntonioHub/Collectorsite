@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: collectorsite
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./data/minio:/data
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build:
+      context: ../Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/collectorsite
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      STORAGE_ENABLED: 'true'
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_ACCESSKEY: minioadmin
+      STORAGE_SECRETKEY: minioadmin
+      STORAGE_BUCKET: items
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    volumes:
+      - ../Frontend/nginx.conf:/etc/nginx/conf.d/default.conf
+
+volumes:
+  pg_data:
+  minio_data: 

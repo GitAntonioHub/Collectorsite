@@ -9,6 +9,8 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ItemDetailComponent } from './item-detail.component';
 import { ItemDTO } from './models';
 import { ItemService } from './item.service';
+import { ListingService } from '../listings/listing.service';
+import { ListingDTO } from '../listings/models';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -170,7 +172,7 @@ import { MatSelectModule } from '@angular/material/select';
             <button class="form-button secondary w-full text-sm" (click)="editItem(item)">
               <mat-icon>edit</mat-icon> Edit Details
             </button>
-            <button class="form-button danger w-full text-sm" (click)="deleteItem(item)">
+            <button class="form-button danger w-full text-sm" (click)="deleteItem(item.id)">
               <mat-icon>delete</mat-icon> Delete
             </button>
             <button *ngIf="item.status === 'DRAFT'" 
@@ -205,6 +207,7 @@ export class MyItemsComponent implements OnInit {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
   private itemSvc = inject(ItemService);
+  private listingSvc = inject(ListingService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
@@ -232,12 +235,13 @@ export class MyItemsComponent implements OnInit {
   load() {
     this.isLoading = true;
     this.error = null;
-    this.itemSvc.myItems().subscribe({
-      next: (items) => {
+    this.itemSvc.getMyItems().subscribe({
+      next: (items: ItemDTO[]) => {
         this.items = items;
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
+        console.error('Error loading items:', err);
         this.error = err.message;
         this.isLoading = false;
       }
@@ -300,18 +304,19 @@ export class MyItemsComponent implements OnInit {
     });
   }
 
-  deleteItem(item: ItemDTO) {
-    if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
-      this.itemSvc.delete(item.id).subscribe({
+  deleteItem(id: string) {
+    if (confirm('Are you sure you want to delete this item?')) {
+      this.itemSvc.delete(id).subscribe({
         next: () => {
-          this.load();
+          this.items = this.items.filter(item => item.id !== id);
           this.snackBar.open('Item deleted successfully', 'Close', {
             duration: 3000,
             horizontalPosition: 'center',
             verticalPosition: 'bottom'
           });
         },
-        error: (err) => {
+        error: (err: any) => {
+          console.error('Error deleting item:', err);
           let message = 'Failed to delete item';
           if (err.message.includes('not authorized')) {
             message = 'You can only delete your own items';
@@ -349,17 +354,27 @@ export class MyItemsComponent implements OnInit {
   }
 
   makeListable(item: ItemDTO) {
-    this.itemSvc.makeListable(item.id).subscribe({
+    const listingData: Partial<ListingDTO> = {
+      itemId: item.id,
+      title: item.title,
+      description: item.description,
+      price: item.estimatedValue || 0,
+      currency: 'USD',
+      listingType: 'SALE' as const,
+      condition: item.condition
+    };
+
+    this.listingSvc.create(listingData).subscribe({
       next: () => {
         this.load();
-        this.snackBar.open('Item is now tradable', 'Close', {
+        this.snackBar.open('Item is now available for trading', 'Close', {
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         });
       },
-      error: (err) => {
-        this.snackBar.open(err.message, 'Close', {
+      error: (error: Error) => {
+        this.snackBar.open(error.message || 'Failed to create listing', 'Close', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',

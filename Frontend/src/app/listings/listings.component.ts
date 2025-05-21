@@ -17,12 +17,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-interface Page<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-}
+import { Page } from '../shared/page.model';
 
 @Component({
   standalone: true,
@@ -201,7 +196,6 @@ export class ListingsComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit() {
-    // Initial load
     this.loadListings();
 
     // Subscribe to filter changes
@@ -221,21 +215,18 @@ export class ListingsComponent implements OnInit {
 
   loadListings() {
     this.isLoading = true;
-    const page = this.paginator?.pageIndex ?? 0;
-    const size = this.paginator?.pageSize ?? this.pageSize;
-
-    this.listSvc.feed(
-        this.q.value ?? '', 
-      page,
-      size
+    this.listSvc.browse(
+      this.q.value ?? '',
+      this.paginator?.pageIndex ?? 0,
+      this.paginator?.pageSize ?? this.pageSize
     ).subscribe({
-      next: (res: Page<ListingDTO>) => {
-        this.listings = res.content;
-        this.totalElements = res.totalElements;
-        this.totalPages = res.totalPages;
+      next: (page: Page<ListingDTO>) => {
+        this.listings = page.content;
+        this.totalElements = page.totalElements;
+        this.totalPages = page.totalPages;
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error loading listings:', err);
         this.isLoading = false;
       }

@@ -178,4 +178,27 @@ public class ListingServiceImpl implements ListingService {
                 .map(ListingServiceImpl::toDto)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ListingDTO> getListingsBySeller(UUID sellerId, Pageable pageable) {
+        return listingRepo.findByItem_Owner_Id(sellerId, pageable)
+                .map(ListingServiceImpl::toDto);
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID listingId, UUID sellerId) {
+        Listing listing = listingRepo.findById(listingId)
+                .orElseThrow(() -> new RuntimeException("Listing not found"));
+
+        if (!listing.getItem().getOwner().getId().equals(sellerId))
+            throw new RuntimeException("Not your listing");
+
+        // Update the item status back to DRAFT
+        listing.getItem().setStatus(ItemStatus.DRAFT);
+        
+        // Delete the listing
+        listingRepo.delete(listing);
+    }
 }

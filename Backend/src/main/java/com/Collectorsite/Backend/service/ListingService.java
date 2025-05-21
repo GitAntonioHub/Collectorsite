@@ -46,4 +46,14 @@ public interface ListingService {
 
     /** Convenience method kept for backward‑compat with old UI */
     List<ListingDTO> listActive();
+    
+    /**
+     * Get listings by seller ID
+     */
+    Page<ListingDTO> getListingsBySeller(UUID sellerId, Pageable pageable);
+    
+    /**
+     * Delete a listing
+     */
+    void delete(UUID listingId, UUID sellerId);
 }

@@ -1,0 +1,576 @@
+{
+  "info": {
+    "_postman_id": "3d84e6af-4e5a-4ca0-9d4f-72cd8f359c0b",
+    "name": "Collectorsite API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1234567"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"identifier\": \"testuser\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Items",
+      "item": [
+        {
+          "name": "Get My Items",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/items/my-items",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items", "my-items"]
+            }
+          }
+        },
+        {
+          "name": "Create Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Test Item\",\n    \"description\": \"This is a test item\",\n    \"condition\": \"EXCELLENT\",\n    \"year\": 2000,\n    \"estimatedValue\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items"]
+            }
+          }
+        },
+        {
+          "name": "Get Item by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/items/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Item Title\",\n    \"description\": \"Updated item description\",\n    \"estimatedValue\": 120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/items/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/items/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items", "{{itemId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listings",
+      "item": [
+        {
+          "name": "Get Listings Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/feed?status=ACTIVE&sort=newest",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "feed"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "sort",
+                  "value": "newest"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Listing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"itemId\": \"{{itemId}}\",\n    \"listingType\": \"SALE\",\n    \"price\": 200,\n    \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/listings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings"]
+            }
+          }
+        },
+        {
+          "name": "Get Listing by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/{{listingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "{{listingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Listing",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 180,\n    \"description\": \"Updated listing description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/{{listingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "{{listingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Close Listing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/{{listingId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "{{listingId}}", "close"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trades",
+      "item": [
+        {
+          "name": "Get Outgoing Trade Offers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/trades/outgoing",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trades", "outgoing"]
+            }
+          }
+        },
+        {
+          "name": "Get Incoming Trade Offers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/trades/incoming",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trades", "incoming"]
+            }
+          }
+        },
+        {
+          "name": "Create Trade Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"listingId\": \"{{listingId}}\",\n    \"message\": \"I would like to trade for your item\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trades",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trades"]
+            }
+          }
+        },
+        {
+          "name": "Accept Trade Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/trades/{{tradeId}}/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trades", "{{tradeId}}", "accept"]
+            }
+          }
+        },
+        {
+          "name": "Decline Trade Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/trades/{{tradeId}}/decline",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trades", "{{tradeId}}", "decline"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "item": [
+        {
+          "name": "Upload Item Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/item-image/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "item-image", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Upload Item Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/item-doc/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "item-doc", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Upload User Avatar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/avatar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "avatar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"displayName\": \"Updated Display Name\",\n    \"bio\": \"Updated user biography\",\n    \"showHolo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"password123\",\n    \"newPassword\": \"newPassword456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 

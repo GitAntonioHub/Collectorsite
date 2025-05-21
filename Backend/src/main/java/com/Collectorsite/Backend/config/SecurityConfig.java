@@ -37,6 +37,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/listings/**").permitAll()
+                .requestMatchers("/api/items/**").permitAll()
+                .requestMatchers("/api/test/**").permitAll()
                 .requestMatchers("/api/ws/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
@@ -50,9 +52,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Angular default port
+        configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:80", "http://localhost"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

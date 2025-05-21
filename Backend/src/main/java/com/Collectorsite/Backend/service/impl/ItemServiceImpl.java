@@ -1,6 +1,7 @@
 package com.Collectorsite.Backend.service.impl;
 
 import com.Collectorsite.Backend.enums.ItemStatus;
+import com.Collectorsite.Backend.enums.VerificationStatus;
 import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.dto.ItemDTO;
 import com.Collectorsite.Backend.entity.*;
@@ -63,8 +64,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO update(ItemDTO dto, UUID ownerId) {
-        CollectorItem item = itemRepo.findById(dto.getId()).orElseThrow();
+    public ItemDTO update(UUID id, ItemDTO dto, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
         
         if (!item.getOwner().getId().equals(ownerId)) {
             throw new RuntimeException("You are not authorized to update this item");
@@ -105,6 +106,31 @@ public class ItemServiceImpl implements ItemService {
 
         item.setStatus(ItemStatus.AVAILABLE);
         itemRepo.save(item);
+        return map(item);
+    }
+    
+    @Override
+    public List<ItemDTO> getItemsByOwner(UUID ownerId) {
+        return itemRepo.findByOwnerId(ownerId)
+                .stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public ItemDTO verifyItem(UUID id) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        item.setStatus(ItemStatus.AVAILABLE);
+        itemRepo.save(item);
+        
+        // Update any pending verification requests
+        List<VerificationRequest> requests = verRepo.findByItemIdAndStatus(id, VerificationStatus.PENDING);
+        for (VerificationRequest request : requests) {
+            request.setStatus(VerificationStatus.APPROVED);
+            request.setVerifiedAt(new Date().toInstant());
+            verRepo.save(request);
+        }
+        
         return map(item);
     }
 }

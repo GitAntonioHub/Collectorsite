@@ -9,7 +9,8 @@ import { Page } from '../shared/page.model';
 export class ListingService {
   private api = inject(ApiService);
 
-  feed(search: string = '', page: number = 0, size: number = 12, sort: string = 'newest'): Observable<Page<ListingDTO>> {
+  // Browse all active listings
+  browse(search: string = '', page: number = 0, size: number = 12, sort: string = 'newest'): Observable<Page<ListingDTO>> {
     const params = {
       q: search,
       page: page.toString(),
@@ -17,7 +18,41 @@ export class ListingService {
       sort: this.getSortParam(sort)
     };
 
-    return this.api.get<Page<ListingDTO>>('/api/listings', params);
+    return this.api.get<Page<ListingDTO>>('/listings', params);
+  }
+
+  // Get user's listings
+  getMyListings(page: number = 0, size: number = 12): Observable<Page<ListingDTO>> {
+    const params = {
+      page: page.toString(),
+      size: size.toString()
+    };
+    return this.api.get<Page<ListingDTO>>('/listings/my-listings', params);
+  }
+
+  // Get single listing
+  get(id: string): Observable<ListingDTO> {
+    return this.api.get<ListingDTO>(`/listings/${id}`);
+  }
+
+  // Create new listing
+  create(dto: Partial<ListingDTO>): Observable<ListingDTO> { 
+    return this.api.post<ListingDTO>('/listings', dto); 
+  }
+
+  // Update listing
+  update(id: string, dto: Partial<ListingDTO>): Observable<ListingDTO> {
+    return this.api.put<ListingDTO>(`/listings/${id}`, dto);
+  }
+
+  // Close listing
+  close(id: string): Observable<ListingDTO> { 
+    return this.api.put<ListingDTO>(`/listings/${id}/close`, {}); 
+  }
+
+  // Delete listing
+  delete(id: string): Observable<void> {
+    return this.api.delete<void>(`/listings/${id}`);
   }
 
   private getSortParam(sort: string): string {
@@ -30,21 +65,5 @@ export class ListingService {
       default:
         return 'createdAt,desc';
     }
-  }
-
-  update(id: string, body: Partial<ListingDTO>): Observable<ListingDTO> {
-    return this.api.put<ListingDTO>(`/api/listings/${id}`, body);
-  }
-
-  get(id: string): Observable<ListingDTO> {
-    return this.api.get<ListingDTO>(`/api/listings/${id}`);
-  }
-
-  create(dto: Partial<ListingDTO>): Observable<ListingDTO> { 
-    return this.api.post<ListingDTO>('/api/listings', dto); 
-  }
-
-  close(id: string): Observable<ListingDTO> { 
-    return this.api.put<ListingDTO>(`/api/listings/${id}/close`, {}); 
   }
 }
