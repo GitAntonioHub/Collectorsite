@@ -7,10 +7,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,6 +49,11 @@ public class PublicItemsController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ItemDTO> create(@Valid @RequestBody ItemDTO dto, Principal principal) {
         try {
+            // Validate year is reasonable
+            if (dto.getYear() != null && (dto.getYear() < 1800 || dto.getYear() > 2100)) {
+                throw new IllegalArgumentException("Year must be between 1800 and 2100");
+            }
+            
             UUID ownerId = UUID.fromString(principal.getName());
             return ResponseEntity.ok(service.create(dto, ownerId));
         } catch (IllegalArgumentException e) {
@@ -58,5 +67,16 @@ public class PublicItemsController {
         return ResponseEntity.status(301)
             .header("Location", "/my-items")
             .build();
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return ResponseEntity.badRequest().body(errors);
     }
 } 
