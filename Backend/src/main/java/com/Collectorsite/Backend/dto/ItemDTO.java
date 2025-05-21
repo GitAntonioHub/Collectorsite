@@ -11,6 +11,8 @@ import com.Collectorsite.Backend.enums.*;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ItemDTO {
     private UUID id;
+    
+    private UUID ownerId;
 
     @NotBlank(message = "Title is required")
     @Size(min = 3, max = 150, message = "Title must be between 3 and 150 characters")

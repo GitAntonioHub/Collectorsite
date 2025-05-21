@@ -21,6 +21,7 @@ public class ItemServiceImpl implements ItemService {
     private ItemDTO map(CollectorItem item) {
         return ItemDTO.builder()
                 .id(item.getId())
+                .ownerId(item.getOwner().getId())
                 .title(item.getTitle())
                 .description(item.getDescription())
                 .condition(item.getCondition())
