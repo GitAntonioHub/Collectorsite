@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
   devtools: # optional, to ignore StorageClient in IDE hot-reload
     restart:
@@ -19,6 +19,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
+  web:
+    cors:
+      allowed-origins: '*'
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: '*'
+      allow-credentials: true
+      max-age: 3600
 server:
   port: 8080
 jwt:
