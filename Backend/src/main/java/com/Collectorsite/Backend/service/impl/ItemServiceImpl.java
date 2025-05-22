@@ -7,8 +7,13 @@ import com.Collectorsite.Backend.dto.ItemDTO;
 import com.Collectorsite.Backend.entity.*;
 import com.Collectorsite.Backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,6 +25,18 @@ public class ItemServiceImpl implements ItemService {
     private final VerificationRequestRepository verRepo;
 
     private ItemDTO map(CollectorItem item) {
+        // Map images if they exist
+        List<ItemDTO.ItemImageDTO> imageDTOs = new ArrayList<>();
+        if (item.getImages() != null && !item.getImages().isEmpty()) {
+            imageDTOs = item.getImages().stream()
+                .map(image -> ItemDTO.ItemImageDTO.builder()
+                    .id(image.getId())
+                    .url(image.getUrl())
+                    .isPrimary(image.getIsPrimary())
+                    .build())
+                .collect(Collectors.toList());
+        }
+        
         return ItemDTO.builder()
                 .id(item.getId())
                 .ownerId(item.getOwner().getId())
@@ -29,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
                 .year(item.getYear())
                 .estimatedValue(item.getEstimatedValue())
                 .status(item.getStatus())
+                .images(imageDTOs)
                 .build();
     }
 
@@ -123,17 +141,64 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDTO verifyItem(UUID id) {
         CollectorItem item = itemRepo.findById(id).orElseThrow();
+        AppUser owner = item.getOwner(); // Get the item's owner
         item.setStatus(ItemStatus.AVAILABLE);
         itemRepo.save(item);
         
-        // Update any pending verification requests
+        // Check if there are existing verification requests
         List<VerificationRequest> requests = verRepo.findByItemIdAndStatus(id, VerificationStatus.PENDING);
-        for (VerificationRequest request : requests) {
-            request.setStatus(VerificationStatus.APPROVED);
-            request.setVerifiedAt(new Date().toInstant());
-            verRepo.save(request);
+        
+        if (requests.isEmpty()) {
+            // If no requests exist, create one
+            verRepo.save(VerificationRequest.builder()
+                .item(item)
+                .requestedBy(owner)  // Set the owner as the requester
+                .status(VerificationStatus.APPROVED)
+                .verifiedAt(new Date().toInstant())
+                .build());
+        } else {
+            // Update existing requests
+            for (VerificationRequest request : requests) {
+                request.setStatus(VerificationStatus.APPROVED);
+                request.setVerifiedAt(new Date().toInstant());
+                verRepo.save(request);
+            }
         }
         
         return map(item);
+    }
+    
+    @Override
+    public Page<ItemDTO> getAvailableItems(String keyword, ItemStatus status, Pageable pageable) {
+        // If we have a keyword, use it to filter items by title or description
+        List<CollectorItem> filteredItems;
+        
+        if (StringUtils.hasText(keyword)) {
+            // Use the new repository method
+            filteredItems = itemRepo.findByStatusAndKeyword(status, keyword);
+        } else {
+            // Just get items by status
+            filteredItems = itemRepo.findByStatus(status);
+        }
+        
+        // Convert to DTOs
+        List<ItemDTO> itemDTOs = filteredItems.stream()
+            .map(this::map)
+            .collect(Collectors.toList());
+            
+        // Manual pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), itemDTOs.size());
+        
+        // Check bounds
+        if (start > itemDTOs.size()) {
+            start = 0;
+            end = Math.min(pageable.getPageSize(), itemDTOs.size());
+        }
+        
+        // Create sublist for pagination
+        List<ItemDTO> pageContent = itemDTOs.subList(start, end);
+        
+        return new PageImpl<>(pageContent, pageable, itemDTOs.size());
     }
 }

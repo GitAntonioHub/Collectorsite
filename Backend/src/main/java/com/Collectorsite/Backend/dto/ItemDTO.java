@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import java.util.List;
 import java.util.UUID;
 import com.Collectorsite.Backend.enums.*;
 import java.time.Year;
@@ -34,4 +35,14 @@ public class ItemDTO {
     private Double estimatedValue;
 
     private ItemStatus status;
+    
+    // Images associated with this item
+    private List<ItemImageDTO> images;
+    
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class ItemImageDTO {
+        private UUID id;
+        private String url;
+        private boolean isPrimary;
+    }
 }

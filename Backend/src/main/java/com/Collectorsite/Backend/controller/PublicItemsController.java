@@ -5,6 +5,10 @@ import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.enums.ItemStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
@@ -67,6 +71,46 @@ public class PublicItemsController {
         return ResponseEntity.status(301)
             .header("Location", "/my-items")
             .build();
+    }
+    
+    @GetMapping("/available")
+    public ResponseEntity<Page<ItemDTO>> getAvailableItems(
+            @RequestParam(defaultValue = "") String q, 
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @RequestParam(defaultValue = "AVAILABLE") String status) {
+        
+        try {
+            // Parse sort parameter
+            String[] sortParams = sort.split(",");
+            String sortField = sortParams[0];
+            Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc") ? 
+                    Sort.Direction.ASC : Sort.Direction.DESC;
+            
+            // Create pageable object
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+            
+            // Parse status parameter with fallback to AVAILABLE
+            ItemStatus itemStatus;
+            try {
+                itemStatus = ItemStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // If "ACTIVE" is passed, map it to AVAILABLE
+                if ("ACTIVE".equalsIgnoreCase(status)) {
+                    itemStatus = ItemStatus.AVAILABLE;
+                } else {
+                    itemStatus = ItemStatus.AVAILABLE; // Default fallback
+                }
+            }
+            
+            // Get paginated and filtered items
+            Page<ItemDTO> items = service.getAvailableItems(q, itemStatus, pageable);
+            
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
