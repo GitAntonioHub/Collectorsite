@@ -13,16 +13,16 @@ public class VerificationRequest {
     @Id @GeneratedValue
     private UUID id;
 
-    @ManyToOne @JoinColumn(nullable = false)
+    @ManyToOne @JoinColumn(name = "item_id", nullable = false)
     private CollectorItem item;
 
-    @ManyToOne @JoinColumn(nullable = false)
+    @ManyToOne @JoinColumn(name = "requested_by_id", nullable = false)
     private AppUser requestedBy;
 
     @Enumerated(EnumType.STRING)
     private VerificationStatus status = VerificationStatus.PENDING;
 
-    @ManyToOne
+    @ManyToOne @JoinColumn(name = "verified_by_id")
     private AppUser verifiedBy;
 
     @Column(nullable = false, updatable = false)
