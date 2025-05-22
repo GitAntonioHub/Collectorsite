@@ -10,22 +10,28 @@ import java.util.*;
 public class AppUser {
 
     @Id @GeneratedValue
+    @Column(name = "id")
     private UUID id;
 
-    @Column(nullable = false, length = 50, unique = true)
+    @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "display_name")
     private String displayName;
+    
+    @Column(name = "avatar_url")
     private String avatarUrl;
+    
+    @Column(name = "rating")
     private Double rating;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
     @PrePersist
     private void onCreate() {
@@ -33,6 +39,8 @@ public class AppUser {
             createdAt = java.time.Instant.now();
         }
     }
+    
+    @Column(name = "last_login")
     private Instant lastLogin;
 
     @Builder.Default

@@ -8,29 +8,53 @@ import com.Collectorsite.Backend.enums.VerificationStatus;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
+@Table(name = "verification_request")
 public class VerificationRequest {
 
-    @Id @GeneratedValue
+    @Id 
+    @GeneratedValue
+    @Column(name = "id")
     private UUID id;
 
-    @ManyToOne @JoinColumn(nullable = false)
+    @ManyToOne 
+    @JoinColumn(name = "item_id", nullable = false)
     private CollectorItem item;
 
-    @ManyToOne @JoinColumn(nullable = false)
+    @ManyToOne 
+    @JoinColumn(name = "requested_by_id", nullable = false)
     private AppUser requestedBy;
 
+    @Column(name = "requested_by", nullable = false, updatable = false)
+    private UUID requestedByUUID;
+
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private VerificationStatus status = VerificationStatus.PENDING;
 
-    @ManyToOne
+    @ManyToOne 
+    @JoinColumn(name = "verified_by", nullable = true)
     private AppUser verifiedBy;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "verified_by_id", nullable = true)
+    private UUID verifiedByUUID;
+
+    @Column(name = "requested_at", nullable = false, updatable = false)
     private Instant requestedAt = Instant.now();
 
+    @Column(name = "verified_at")
     private Instant verifiedAt;
 
     @Lob
-    @Column(columnDefinition = "text")
+    @Column(name = "notes", columnDefinition = "text")
     private String notes;
+    
+    @PrePersist
+    private void onPersist() {
+        if (requestedBy != null && requestedByUUID == null) {
+            requestedByUUID = requestedBy.getId();
+        }
+        if (verifiedBy != null && verifiedByUUID == null) {
+            verifiedByUUID = verifiedBy.getId();
+        }
+    }
 }

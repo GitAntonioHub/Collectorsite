@@ -84,8 +84,8 @@ import { MatSelectModule } from '@angular/material/select';
               <mat-form-field appearance="fill">
                 <mat-label>Condition</mat-label>
                 <mat-select formControlName="condition">
-                  <mat-option value="NEW">New</mat-option>
-                  <mat-option value="LIKE_NEW">Like New</mat-option>
+                  <mat-option value="MINT">Mint</mat-option>
+                  <mat-option value="EXCELLENT">Excellent</mat-option>
                   <mat-option value="GOOD">Good</mat-option>
                   <mat-option value="FAIR">Fair</mat-option>
                   <mat-option value="POOR">Poor</mat-option>
@@ -273,7 +273,7 @@ export class MyItemsComponent implements OnInit {
   fg: FormGroup = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
-    condition: ['NEW'],
+    condition: ['MINT'],
     year: [null, [Validators.min(1800)]],
     estimatedValue: [null, [Validators.min(0)]]
   });

@@ -8,41 +8,54 @@ import com.Collectorsite.Backend.enums.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
+@Table(name = "collectoritem")
 public class CollectorItem {
 
     @Id @GeneratedValue
+    @Column(name = "id")
     private UUID id;
 
-    @ManyToOne @JoinColumn(nullable = false)
+    @ManyToOne @JoinColumn(name = "owner_id", nullable = false)
     private AppUser owner;
 
-    @ManyToOne
+    @ManyToOne @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "title", nullable = false, length = 150)
     private String title;
 
     @Lob
-    @Column(columnDefinition = "text")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "condition")
     private ItemCondition condition;
 
+    @Column(name = "year")
     private Integer year;
+    
+    @Column(name = "estimated_value")
     private Double estimatedValue;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private ItemStatus status = ItemStatus.DRAFT;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "createdat", nullable = false, updatable = false)
     private Instant createdAt;
+    
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = true)
+    private Instant createdAtDuplicate;
+    
     @PrePersist
     private void onCreate() {
+        Instant now = Instant.now();
         if (createdAt == null) {
-            createdAt = Instant.now();
+            createdAt = now;
         }
+        createdAtDuplicate = createdAt;
     }
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
