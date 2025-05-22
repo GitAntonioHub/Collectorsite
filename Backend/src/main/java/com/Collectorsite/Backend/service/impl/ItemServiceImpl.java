@@ -8,6 +8,7 @@ import com.Collectorsite.Backend.entity.*;
 import com.Collectorsite.Backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,6 +112,7 @@ public class ItemServiceImpl implements ItemService {
     }
     
     @Override
+    @Transactional
     public List<ItemDTO> getItemsByOwner(UUID ownerId) {
         return itemRepo.findByOwnerId(ownerId)
                 .stream()

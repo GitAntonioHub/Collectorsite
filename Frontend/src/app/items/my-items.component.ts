@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ItemDetailComponent } from './item-detail.component';
-import { ItemDTO } from './models';
+import { ItemDTO, ItemStatus } from './models';
 import { ItemService } from './item.service';
 import { ListingService } from '../listings/listing.service';
 import { ListingDTO } from '../listings/models';
@@ -175,10 +175,10 @@ import { MatSelectModule } from '@angular/material/select';
             <button class="form-button danger w-full text-sm" (click)="deleteItem(item.id)">
               <mat-icon>delete</mat-icon> Delete
             </button>
-            <button *ngIf="item.status === 'DRAFT'" 
+            <button *ngIf="item.status === ItemStatus.DRAFT" 
                     class="form-button primary w-full text-sm"
                     (click)="makeListable(item)">
-              <mat-icon>store</mat-icon> Make Tradable
+              <mat-icon>store</mat-icon> Make Available
             </button>
           </div>
         </div>
@@ -212,6 +212,9 @@ export class MyItemsComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
 
+  // Make ItemStatus enum available to the template
+  ItemStatus = ItemStatus;
+  
   selected?: ItemDTO;
   editingItem?: ItemDTO;
   items: ItemDTO[] = [];
@@ -354,17 +357,7 @@ export class MyItemsComponent implements OnInit {
   }
 
   makeListable(item: ItemDTO) {
-    const listingData: Partial<ListingDTO> = {
-      itemId: item.id,
-      title: item.title,
-      description: item.description,
-      price: item.estimatedValue || 0,
-      currency: 'USD',
-      listingType: 'SALE' as const,
-      condition: item.condition
-    };
-
-    this.listingSvc.create(listingData).subscribe({
+    this.api.put(`/my-items/${item.id}/make-listable`, {}).subscribe({
       next: () => {
         this.load();
         this.snackBar.open('Item is now available for trading', 'Close', {
@@ -373,8 +366,10 @@ export class MyItemsComponent implements OnInit {
           verticalPosition: 'bottom'
         });
       },
-      error: (error: Error) => {
-        this.snackBar.open(error.message || 'Failed to create listing', 'Close', {
+      error: (error: any) => {
+        console.error('Error making item available:', error);
+        const errorMsg = error.error?.message || error.message || 'Failed to make item available';
+        this.snackBar.open(errorMsg, 'Close', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',

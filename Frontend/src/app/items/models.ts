@@ -5,9 +5,17 @@ export interface ItemDTO {
   condition?: string;
   year?: number;
   estimatedValue?: number;
-  status?: string;
+  status?: ItemStatus;
   images?: ItemImage[];
   documents?: ItemDocument[];
+}
+
+export enum ItemStatus {
+  DRAFT = 'DRAFT',
+  AVAILABLE = 'AVAILABLE',
+  LISTED = 'LISTED',
+  SOLD = 'SOLD',
+  TRADED = 'TRADED'
 }
 
 export interface ItemImage {
