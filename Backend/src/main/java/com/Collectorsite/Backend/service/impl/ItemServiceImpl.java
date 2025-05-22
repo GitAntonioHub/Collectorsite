@@ -16,8 +16,10 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.Instant;
 
 @Service @RequiredArgsConstructor
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final CollectorItemRepository itemRepo;
@@ -51,26 +53,62 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDTO create(ItemDTO dto, UUID ownerId) {
-        AppUser owner = userRepo.findById(ownerId).orElseThrow();
+        try {
+            // Get the user explicitly with detailed error reporting
+            AppUser owner = userRepo.findById(ownerId)
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + ownerId));
+            
+            System.out.println("Owner found: " + owner.getId() + ", username: " + owner.getUsername());
 
-        CollectorItem item = CollectorItem.builder()
-                .title(dto.getTitle())
-                .description(dto.getDescription())
-                .condition(dto.getCondition())
-                .year(dto.getYear())
-                .estimatedValue(dto.getEstimatedValue())
-                .owner(owner)
-                .status(ItemStatus.DRAFT)
-                .build();
+            // Create the item with explicit timestamps for both fields
+            Instant now = Instant.now();
+            CollectorItem item = CollectorItem.builder()
+                    .title(dto.getTitle())
+                    .description(dto.getDescription())
+                    .condition(dto.getCondition())
+                    .year(dto.getYear())
+                    .estimatedValue(dto.getEstimatedValue())
+                    .owner(owner)
+                    .status(ItemStatus.DRAFT)
+                    .createdAt(now)
+                    .build();
+            
+            // Explicitly set the duplicate field
+            item.setCreatedAtDuplicate(now);
 
-        itemRepo.save(item);
-        verRepo.save(VerificationRequest.builder()
-                .item(item)
-                .requestedBy(owner)
-                .build());
+            // Save item and get the saved entity with ID
+            CollectorItem savedItem = itemRepo.save(item);
+            
+            // Force immediate database insert with flush
+            itemRepo.flush();
+            
+            System.out.println("Item saved with ID: " + savedItem.getId());
 
-        return map(item);
+            // Create verification request - explicitly copy the saved item ID instead of using entity reference
+            VerificationRequest request = new VerificationRequest();
+            request.setItem(savedItem);
+            request.setRequestedBy(owner);
+            request.setRequestedByUUID(owner.getId());
+            request.setStatus(VerificationStatus.PENDING);
+            request.setRequestedAt(Instant.now());
+
+            System.out.println("Saving verification request with item ID: " + savedItem.getId() + 
+                    " and requestedBy ID: " + owner.getId());
+                
+            // Save verification request and flush to ensure it's written
+            VerificationRequest savedRequest = verRepo.save(request);
+            verRepo.flush();
+            
+            System.out.println("Verification request saved successfully with ID: " + savedRequest.getId());
+
+            return map(savedItem);
+        } catch (Exception e) {
+            System.out.println("Error creating item: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for better debugging
+            throw e;
+        }
     }
 
     @Override
