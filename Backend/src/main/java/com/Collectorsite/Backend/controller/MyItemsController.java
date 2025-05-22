@@ -7,6 +7,8 @@ import com.Collectorsite.Backend.enums.ListingType;
 import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.service.ListingService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +36,13 @@ public class MyItemsController {
     // Data transfer object for listing an item for sale
     @Data
     public static class ListForSaleDTO {
+        @NotNull(message = "Item ID is required")
         private UUID itemId;
+        
+        @NotNull(message = "Price is required")
+        @Positive(message = "Price must be greater than zero")
         private Double price;
+        
         private String currency = "USD";
     }
 
@@ -141,7 +148,14 @@ public class MyItemsController {
             
             return ResponseEntity.ok(listing);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            // Log the error for debugging
+            System.err.println("Error listing item for sale: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Return error response
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
     
