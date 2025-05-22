@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guard/auth.guard';
 import { ITEMS_ROUTES } from './items/items.routes';
+import { ListingsComponent } from './listings/listings.component';
 
 export const routes: Routes = [
   { 
@@ -17,9 +18,13 @@ export const routes: Routes = [
   },
   {
     path: 'listings',
-    loadChildren: () => import('./listings/listings.routes').then(m => m.routes)
+    children: [
+      { path: 'feed', component: ListingsComponent },
+      { path: ':id', loadComponent: () => import('./listings/listing-detail.component').then(m => m.ListingDetailComponent) },
+      { path: '', component: ListingsComponent }
+    ]
   },
-  {
+  { 
     path: 'items',
     children: ITEMS_ROUTES
   },

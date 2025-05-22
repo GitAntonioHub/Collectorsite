@@ -1,59 +1,45 @@
 /* src/app/items/item.service.ts */
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Observable, catchError, throwError } from 'rxjs';
-import { ItemDTO, Item } from './models';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ItemDTO } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class ItemService {
   private api = inject(ApiService);
 
-  private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'An error occurred';
-    
-    if (error.error?.message) {
-      // Server returned an error message
-      errorMessage = error.error.message;
-    } else if (typeof error.error === 'object') {
-      // Handle validation errors
-      const validationErrors = Object.values(error.error).join(', ');
-      errorMessage = `Validation failed: ${validationErrors}`;
-    } else {
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-    }
-
-    return throwError(() => new Error(errorMessage));
+  // Get all items
+  list(): Observable<ItemDTO[]> {
+    return this.api.get<ItemDTO[]>('/items');
   }
 
-  myItems(): Observable<ItemDTO[]> {
-    return this.api.get<ItemDTO[]>('/items')
-      .pipe(catchError(this.handleError));
+  // Get user's items
+  getMyItems(): Observable<ItemDTO[]> {
+    return this.api.get<ItemDTO[]>('/items/my-items');
   }
 
-  create(body: Partial<ItemDTO>): Observable<ItemDTO> {
-    return this.api.post<ItemDTO>('/items', body)
-      .pipe(catchError(this.handleError));
+  // Get single item
+  get(id: string): Observable<ItemDTO> {
+    return this.api.get<ItemDTO>(`/items/${id}`);
   }
 
-  one(id: string): Observable<ItemDTO> {
-    return this.api.get<ItemDTO>(`/items/${id}`)
-      .pipe(catchError(this.handleError));
+  // Create new item
+  create(dto: Partial<ItemDTO>): Observable<ItemDTO> {
+    return this.api.post<ItemDTO>('/items', dto);
   }
 
-  makeListable(itemId: string): Observable<ItemDTO> {
-    return this.api.post<ItemDTO>(`/items/${itemId}/make-listable`, {})
-      .pipe(catchError(this.handleError));
+  // Update item
+  update(id: string, dto: Partial<ItemDTO>): Observable<ItemDTO> {
+    return this.api.put<ItemDTO>(`/items/${id}`, dto);
   }
 
-  getItems(search: string = '', page: number = 0, size: number = 12): Observable<any> {
-    const params = {
-      q: search,
-      page: page.toString(),
-      size: size.toString(),
-      status: 'ACTIVE'
-    };
-    return this.api.get<any>('/listings', params)
-      .pipe(catchError(this.handleError));
+  // Delete item
+  delete(id: string): Observable<void> {
+    return this.api.delete<void>(`/items/${id}`);
+  }
+
+  // Verify item (admin only)
+  verifyItem(id: string): Observable<ItemDTO> {
+    return this.api.put<ItemDTO>(`/items/${id}/verify`, {});
   }
 }

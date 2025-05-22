@@ -44,20 +44,20 @@ import { AuthStore } from '../core/state/auth.store';
             <div class="space-y-3 pt-4">
               <button *ngIf="listing.listingType === 'AUCTION'"
                       class="retro-btn w-full"
-                      [disabled]="!auth.isAuthenticated()"
+                      [disabled]="!auth.isAuthenticated"
                       (click)="placeBid()">
                 Place Bid
               </button>
               
               <button *ngIf="listing.listingType === 'SALE'"
                       class="retro-btn w-full"
-                      [disabled]="!auth.isAuthenticated()"
+                      [disabled]="!auth.isAuthenticated"
                       (click)="purchase()">
                 Purchase Now
               </button>
 
               <button class="retro-btn w-full"
-                      [disabled]="!auth.isAuthenticated()"
+                      [disabled]="!auth.isAuthenticated"
                       (click)="contact()">
                 Contact Seller
               </button>

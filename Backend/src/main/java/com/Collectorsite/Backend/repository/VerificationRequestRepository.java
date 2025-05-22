@@ -15,4 +15,7 @@ public interface VerificationRequestRepository extends JpaRepository<Verificatio
     Optional<VerificationRequest> findTopByItem_IdOrderByRequestedAtDesc(UUID itemId);
 
     boolean existsByItem_IdAndStatus(UUID itemId, VerificationStatus status);
+    
+    // Updated to use VerificationStatus enum
+    List<VerificationRequest> findByItemIdAndStatus(UUID itemId, VerificationStatus status);
 }

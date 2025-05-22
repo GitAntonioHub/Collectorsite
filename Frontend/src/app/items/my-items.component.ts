@@ -7,11 +7,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ItemDetailComponent } from './item-detail.component';
-import { ItemDTO } from './models';
+import { ItemDTO, ItemStatus } from './models';
 import { ItemService } from './item.service';
+import { ListingService } from '../listings/listing.service';
+import { ListingDTO } from '../listings/models';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-my-items',
@@ -25,7 +28,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     ItemDetailComponent,
     MatIconModule,
     MatSnackBarModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSelectModule
   ],
   template: `
     <div class="container mx-auto p-6">
@@ -36,15 +40,17 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         </button>
       </div>
 
-      <!-- Add Item Form Dialog -->
-      <div *ngIf="showAddItemForm" class="fixed inset-0 bg-black/80 flex items-center justify-center p-6 z-50">
+      <!-- Add/Edit Item Form Dialog -->
+      <div *ngIf="showAddItemForm || editingItem" class="fixed inset-0 bg-black/80 flex items-center justify-center p-6 z-50">
         <div class="bg-black border-2 border-white p-8 max-w-md w-full">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-white font-retrofuture uppercase">Add New Item</h2>
-            <button class="text-white hover:text-cyan-400" (click)="showAddItemForm = false">×</button>
+            <h2 class="text-2xl font-bold text-white font-retrofuture uppercase">
+              {{ editingItem ? 'Edit Item' : 'Add New Item' }}
+            </h2>
+            <button class="text-white hover:text-cyan-400" (click)="closeForm()">×</button>
           </div>
           
-          <form [formGroup]="fg" (ngSubmit)="create()" class="space-y-6">
+          <form [formGroup]="fg" (ngSubmit)="editingItem ? update() : create()" class="space-y-6">
             <div class="form-field">
               <mat-form-field appearance="fill">
                 <mat-label>Title</mat-label>
@@ -76,6 +82,19 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
             <div class="form-field">
               <mat-form-field appearance="fill">
+                <mat-label>Condition</mat-label>
+                <mat-select formControlName="condition">
+                  <mat-option value="NEW">New</mat-option>
+                  <mat-option value="LIKE_NEW">Like New</mat-option>
+                  <mat-option value="GOOD">Good</mat-option>
+                  <mat-option value="FAIR">Fair</mat-option>
+                  <mat-option value="POOR">Poor</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field">
+              <mat-form-field appearance="fill">
                 <mat-label>Year</mat-label>
                 <input matInput type="number" formControlName="year">
                 <mat-error *ngIf="fg.get('year')?.hasError('min')">
@@ -99,7 +118,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
               <button type="submit" 
                       class="form-button primary w-full"
                       [disabled]="fg.invalid || isSubmitting">
-                {{ isSubmitting ? 'Adding...' : 'Add Item' }}
+                {{ isSubmitting ? (editingItem ? 'Updating...' : 'Adding...') : (editingItem ? 'Update Item' : 'Add Item') }}
               </button>
             </div>
           </form>
@@ -130,9 +149,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
              class="bg-black/30 border-2 border-white p-4 hover:bg-black/50 transition-all">
           <div class="aspect-square mb-4 bg-black/30 border-2 border-white overflow-hidden cursor-pointer"
                (click)="selectItem(item)">
-            <!-- Image placeholder or first item image -->
-            <div class="w-full h-full flex items-center justify-center text-white/50 font-retrofuture">
-              Item Image
+            <img *ngIf="item.images?.length" [src]="item.images?.[0]?.url || ''" [alt]="item.title" 
+                 class="w-full h-full object-cover">
+            <div *ngIf="!item.images?.length" class="w-full h-full flex items-center justify-center text-white/50 font-retrofuture">
+              No Image
             </div>
           </div>
           
@@ -149,13 +169,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
           <!-- Action Buttons -->
           <div class="space-y-2">
-            <button class="form-button secondary w-full text-sm" (click)="selectItem(item)">
+            <button class="form-button secondary w-full text-sm" (click)="editItem(item)">
               <mat-icon>edit</mat-icon> Edit Details
             </button>
-            <button *ngIf="item.status === 'DRAFT'" 
+            <button class="form-button danger w-full text-sm" (click)="deleteItem(item.id)">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+            <button *ngIf="item.status === ItemStatus.DRAFT" 
                     class="form-button primary w-full text-sm"
                     (click)="makeListable(item)">
-              <mat-icon>store</mat-icon> Make Tradable
+              <mat-icon>store</mat-icon> Make Available
             </button>
           </div>
         </div>
@@ -184,11 +207,16 @@ export class MyItemsComponent implements OnInit {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
   private itemSvc = inject(ItemService);
+  private listingSvc = inject(ListingService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
 
+  // Make ItemStatus enum available to the template
+  ItemStatus = ItemStatus;
+  
   selected?: ItemDTO;
+  editingItem?: ItemDTO;
   items: ItemDTO[] = [];
   isLoading = false;
   isSubmitting = false;
@@ -198,6 +226,7 @@ export class MyItemsComponent implements OnInit {
   fg: FormGroup = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
+    condition: ['NEW'],
     year: [null, [Validators.min(1800)]],
     estimatedValue: [null, [Validators.min(0)]]
   });
@@ -209,12 +238,13 @@ export class MyItemsComponent implements OnInit {
   load() {
     this.isLoading = true;
     this.error = null;
-    this.itemSvc.myItems().subscribe({
-      next: (items) => {
+    this.itemSvc.getMyItems().subscribe({
+      next: (items: ItemDTO[]) => {
         this.items = items;
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
+        console.error('Error loading items:', err);
         this.error = err.message;
         this.isLoading = false;
       }
@@ -249,22 +279,97 @@ export class MyItemsComponent implements OnInit {
     });
   }
 
-  selectItem(item: ItemDTO) {
-    this.selected = item;
-  }
-
-  makeListable(item: ItemDTO) {
-    this.itemSvc.makeListable(item.id).subscribe({
+  update() {
+    if (this.fg.invalid || !this.editingItem) return;
+    
+    this.isSubmitting = true;
+    this.itemSvc.update(this.editingItem.id, this.fg.value).subscribe({
       next: () => {
         this.load();
-        this.snackBar.open('Item is now tradable', 'Close', {
+        this.fg.reset();
+        this.isSubmitting = false;
+        this.editingItem = undefined;
+        this.snackBar.open('Item updated successfully', 'Close', {
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         });
       },
       error: (err) => {
+        this.isSubmitting = false;
         this.snackBar.open(err.message, 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
+  deleteItem(id: string) {
+    if (confirm('Are you sure you want to delete this item?')) {
+      this.itemSvc.delete(id).subscribe({
+        next: () => {
+          this.items = this.items.filter(item => item.id !== id);
+          this.snackBar.open('Item deleted successfully', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom'
+          });
+        },
+        error: (err: any) => {
+          console.error('Error deleting item:', err);
+          let message = 'Failed to delete item';
+          if (err.message.includes('not authorized')) {
+            message = 'You can only delete your own items';
+          }
+          this.snackBar.open(message, 'Close', {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+    }
+  }
+
+  editItem(item: ItemDTO) {
+    this.editingItem = item;
+    this.fg.patchValue({
+      title: item.title,
+      description: item.description,
+      condition: item.condition,
+      year: item.year,
+      estimatedValue: item.estimatedValue
+    });
+  }
+
+  closeForm() {
+    this.showAddItemForm = false;
+    this.editingItem = undefined;
+    this.fg.reset();
+  }
+
+  selectItem(item: ItemDTO) {
+    this.selected = item;
+  }
+
+  makeListable(item: ItemDTO) {
+    this.api.put(`/my-items/${item.id}/make-listable`, {}).subscribe({
+      next: () => {
+        this.load();
+        this.snackBar.open('Item is now available for trading', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        });
+      },
+      error: (error: any) => {
+        console.error('Error making item available:', error);
+        const errorMsg = error.error?.message || error.message || 'Failed to make item available';
+        this.snackBar.open(errorMsg, 'Close', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',

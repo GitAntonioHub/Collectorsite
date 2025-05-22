@@ -1,12 +1,14 @@
 package com.Collectorsite.Backend.service.impl;
 
 import com.Collectorsite.Backend.enums.ItemStatus;
+import com.Collectorsite.Backend.enums.VerificationStatus;
 import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.dto.ItemDTO;
 import com.Collectorsite.Backend.entity.*;
 import com.Collectorsite.Backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,7 @@ public class ItemServiceImpl implements ItemService {
     private ItemDTO map(CollectorItem item) {
         return ItemDTO.builder()
                 .id(item.getId())
+                .ownerId(item.getOwner().getId())
                 .title(item.getTitle())
                 .description(item.getDescription())
                 .condition(item.getCondition())
@@ -63,23 +66,74 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO update(ItemDTO dto, UUID ownerId) {
-        CollectorItem item = itemRepo.findById(dto.getId())
-            .orElseThrow(() -> new RuntimeException("Item not found"));
-
+    public ItemDTO update(UUID id, ItemDTO dto, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        
         if (!item.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Not authorized to update this item");
+            throw new RuntimeException("You are not authorized to update this item");
         }
 
-        // Update mutable fields
         item.setTitle(dto.getTitle());
         item.setDescription(dto.getDescription());
         item.setCondition(dto.getCondition());
         item.setYear(dto.getYear());
         item.setEstimatedValue(dto.getEstimatedValue());
-        item.setStatus(dto.getStatus());
 
         itemRepo.save(item);
+        return map(item);
+    }
+
+    @Override
+    public void delete(UUID id, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        
+        if (!item.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("You are not authorized to delete this item");
+        }
+
+        itemRepo.delete(item);
+    }
+
+    @Override
+    public ItemDTO makeListable(UUID id, UUID ownerId) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        
+        if (!item.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("You are not authorized to modify this item");
+        }
+
+        if (!item.getStatus().equals(ItemStatus.DRAFT)) {
+            throw new RuntimeException("Item must be in DRAFT status to make it listable");
+        }
+
+        item.setStatus(ItemStatus.AVAILABLE);
+        itemRepo.save(item);
+        return map(item);
+    }
+    
+    @Override
+    @Transactional
+    public List<ItemDTO> getItemsByOwner(UUID ownerId) {
+        return itemRepo.findByOwnerId(ownerId)
+                .stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public ItemDTO verifyItem(UUID id) {
+        CollectorItem item = itemRepo.findById(id).orElseThrow();
+        item.setStatus(ItemStatus.AVAILABLE);
+        itemRepo.save(item);
+        
+        // Update any pending verification requests
+        List<VerificationRequest> requests = verRepo.findByItemIdAndStatus(id, VerificationStatus.PENDING);
+        for (VerificationRequest request : requests) {
+            request.setStatus(VerificationStatus.APPROVED);
+            request.setVerifiedAt(new Date().toInstant());
+            verRepo.save(request);
+        }
+        
         return map(item);
     }
 }

@@ -33,14 +33,17 @@ public class Listing {
     private Instant startDate;
 
     private Instant endDate;
+    
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
     @PrePersist
     private void onCreate() {
         if (startDate == null) {
             startDate = Instant.now();
         }
-        if (endDate == null) {
-            endDate = Instant.now();
+        if (createdAt == null) {
+            createdAt = Instant.now();
         }
     }
 
