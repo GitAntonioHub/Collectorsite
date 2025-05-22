@@ -15,6 +15,12 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+        # Use explicit PhysicalNamingStrategy to handle snake_case properly
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        format_sql: true
+        show_sql: true
+    show-sql: true
 
   devtools: # optional, to ignore StorageClient in IDE hot-reload
     restart:
