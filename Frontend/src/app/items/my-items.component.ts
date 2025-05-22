@@ -177,10 +177,55 @@ import { MatSelectModule } from '@angular/material/select';
             </button>
             <button *ngIf="item.status === ItemStatus.DRAFT" 
                     class="form-button primary w-full text-sm"
-                    (click)="makeListable(item)">
-              <mat-icon>store</mat-icon> Make Available
+                    (click)="listForSale(item)">
+              <mat-icon>store</mat-icon> List for Sale
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- List Item For Sale Dialog -->
+      <div *ngIf="listingItem" class="fixed inset-0 bg-black/80 flex items-center justify-center p-6 z-50">
+        <div class="bg-black border-2 border-white p-8 max-w-md w-full">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white font-retrofuture uppercase">List "{{listingItem.title}}" for Sale</h2>
+            <button class="text-white hover:text-cyan-400" (click)="listingItem = undefined">×</button>
+          </div>
+          
+          <form [formGroup]="listingForm" (ngSubmit)="confirmListForSale()" class="space-y-6">
+            <div class="form-field">
+              <mat-form-field appearance="fill">
+                <mat-label>Price</mat-label>
+                <input matInput type="number" formControlName="price" required>
+                <span matPrefix>$&nbsp;</span>
+                <mat-error *ngIf="listingForm.get('price')?.hasError('required')">
+                  Price is required
+                </mat-error>
+                <mat-error *ngIf="listingForm.get('price')?.hasError('min')">
+                  Price must be greater than zero
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-field">
+              <mat-form-field appearance="fill">
+                <mat-label>Currency</mat-label>
+                <mat-select formControlName="currency">
+                  <mat-option value="USD">USD ($)</mat-option>
+                  <mat-option value="EUR">EUR (€)</mat-option>
+                  <mat-option value="GBP">GBP (£)</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" 
+                      class="form-button primary w-full"
+                      [disabled]="listingForm.invalid || isListingSubmitting">
+                {{ isListingSubmitting ? 'Listing...' : 'List Item for Sale' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -222,6 +267,8 @@ export class MyItemsComponent implements OnInit {
   isSubmitting = false;
   error: string | null = null;
   showAddItemForm = false;
+  listingItem?: ItemDTO;
+  isListingSubmitting = false;
 
   fg: FormGroup = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
@@ -229,6 +276,11 @@ export class MyItemsComponent implements OnInit {
     condition: ['NEW'],
     year: [null, [Validators.min(1800)]],
     estimatedValue: [null, [Validators.min(0)]]
+  });
+
+  listingForm: FormGroup = this.fb.group({
+    price: ['', [Validators.required, Validators.min(0.01)]],
+    currency: ['USD', Validators.required]
   });
 
   ngOnInit() { 
@@ -356,25 +408,45 @@ export class MyItemsComponent implements OnInit {
     this.selected = item;
   }
 
-  makeListable(item: ItemDTO) {
-    this.api.put(`/my-items/${item.id}/make-listable`, {}).subscribe({
+  listForSale(item: ItemDTO) {
+    this.listingItem = item;
+    this.listingForm.reset({
+      price: item.estimatedValue || '',
+      currency: 'USD'
+    });
+  }
+  
+  confirmListForSale() {
+    if (this.listingForm.invalid || !this.listingItem) return;
+    
+    this.isListingSubmitting = true;
+    
+    const dto = {
+      ...this.listingForm.value,
+      itemId: this.listingItem.id
+    };
+    
+    this.api.post('/my-items/list-for-sale', dto).subscribe({
       next: () => {
         this.load();
-        this.snackBar.open('Item is now available for trading', 'Close', {
+        this.isListingSubmitting = false;
+        this.listingItem = undefined;
+        this.snackBar.open('Item listed for sale successfully', 'Close', {
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         });
       },
       error: (error: any) => {
-        console.error('Error making item available:', error);
-        const errorMsg = error.error?.message || error.message || 'Failed to make item available';
+        console.error('Error listing item for sale:', error);
+        const errorMsg = error.error?.message || error.message || 'Failed to list item for sale';
         this.snackBar.open(errorMsg, 'Close', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',
           panelClass: ['error-snackbar']
         });
+        this.isListingSubmitting = false;
       }
     });
   }

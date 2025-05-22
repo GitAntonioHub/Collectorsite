@@ -44,7 +44,7 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
 
         <div class="nav-links" [class.mobile-open]="isMobileMenuOpen">
-          <a routerLink="/listings" class="retro-btn nav-link">Browse</a>
+          <a routerLink="/listings" class="retro-btn nav-link">Available Items</a>
           <a [routerLink]="auth.isAuthenticated ? '/items' : '/login'" class="retro-btn nav-link">My&nbsp;Items</a>
           <a [routerLink]="auth.isAuthenticated ? '/trade' : '/login'" class="retro-btn nav-link">Trade</a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/verify" class="retro-btn nav-link">Admin</a>

@@ -1,8 +1,13 @@
 package com.Collectorsite.Backend.controller;
 
+import com.Collectorsite.Backend.dto.CreateListingDTO;
 import com.Collectorsite.Backend.dto.ItemDTO;
+import com.Collectorsite.Backend.dto.ListingDTO;
+import com.Collectorsite.Backend.enums.ListingType;
 import com.Collectorsite.Backend.service.ItemService;
+import com.Collectorsite.Backend.service.ListingService;
 import jakarta.validation.Valid;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +29,15 @@ import java.util.UUID;
 public class MyItemsController {
 
     private final ItemService service;
+    private final ListingService listingService;
+    
+    // Data transfer object for listing an item for sale
+    @Data
+    public static class ListForSaleDTO {
+        private UUID itemId;
+        private Double price;
+        private String currency = "USD";
+    }
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -103,6 +118,30 @@ public class MyItemsController {
             return ResponseEntity.ok(service.makeListable(id, ownerId));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PostMapping("/list-for-sale")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ListingDTO> listForSale(
+            @Valid @RequestBody ListForSaleDTO dto,
+            Principal principal) {
+        try {
+            UUID sellerId = UUID.fromString(principal.getName());
+            
+            // Create a proper CreateListingDTO object
+            CreateListingDTO createDto = new CreateListingDTO();
+            createDto.setItemId(dto.getItemId());
+            createDto.setPrice(BigDecimal.valueOf(dto.getPrice()));
+            createDto.setCurrency(dto.getCurrency());
+            createDto.setListingType(ListingType.SALE);
+            
+            // Create listing and set item status to AVAILABLE
+            ListingDTO listing = listingService.create(createDto, sellerId);
+            
+            return ResponseEntity.ok(listing);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
     

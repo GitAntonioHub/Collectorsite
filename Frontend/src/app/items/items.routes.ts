@@ -10,6 +10,11 @@ export const ITEMS_ROUTES: Routes = [
     title: 'Browse Items'
   },
   {
+    path: 'available',
+    component: BrowseComponent,
+    title: 'Available Items'
+  },
+  {
     path: ':id',
     component: ItemPublicDetailComponent,
     title: 'Item Details'

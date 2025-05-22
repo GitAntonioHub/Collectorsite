@@ -1,243 +1,191 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { merge } from 'rxjs';
-import { startWith, switchMap } from 'rxjs/operators';
-import { ApiService } from '../core/api.service';
-import { ListingDTO } from './models';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { ViewChild } from '@angular/core';
-import { ListingService } from './listing.service';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { Router, RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ItemService } from '../items/item.service';
+import { ItemDTO, ItemStatus } from '../items/models';
 import { Page } from '../shared/page.model';
+import { FormsModule } from '@angular/forms';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Router } from '@angular/router';
+import { ApiService } from '../core/api.service';
 
 @Component({
-  standalone: true,
   selector: 'app-listings',
-  imports: [
-    CommonModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule, 
-    MatInputModule,
-    MatPaginatorModule, 
-    MatTableModule,
-    MatSelectModule,
-    MatCardModule,
-    MatButtonModule,
-    RouterModule,
-    MatIconModule,
-    MatProgressSpinnerModule
-  ],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   template: `
-    <div class="container mx-auto p-6">
-      <h1 class="text-4xl font-bold text-center mb-8 text-white font-retrofuture uppercase tracking-wider">Browse Items</h1>
-      
-      <!-- Search and Filters -->
-      <div class="flex items-center gap-4 mb-8">
-        <div class="flex-1 relative">
-          <mat-form-field appearance="fill" class="w-full">
-              <mat-label>Search Items</mat-label>
-              <input matInput [formControl]="q" placeholder="Search by title...">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          </div>
-          
-            <mat-form-field appearance="fill">
-              <mat-label>Sort By</mat-label>
-              <mat-select [formControl]="sortBy">
-                <mat-option value="price_asc">Price: Low to High</mat-option>
-                <mat-option value="price_desc">Price: High to Low</mat-option>
-                <mat-option value="newest">Newest First</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill">
-              <mat-label>Type</mat-label>
-              <mat-select [formControl]="listingType">
-                <mat-option value="all">All</mat-option>
-                <mat-option value="SALE">For Sale</mat-option>
-                <mat-option value="AUCTION">Auction</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-      <!-- Loading State -->
-      <div *ngIf="isLoading" class="flex justify-center items-center py-12">
-        <mat-spinner [diameter]="40"></mat-spinner>
-      </div>
-
-      <!-- Grid of Listings -->
-      <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div *ngFor="let listing of listings" 
-             class="bg-black/50 border-2 border-white overflow-hidden cursor-pointer hover:bg-black/70 transition-all"
-             (click)="viewListing(listing)">
-          <div class="aspect-square bg-black/30 border-b-2 border-white overflow-hidden">
-            <ng-container *ngIf="listing.images && listing.images.length > 0 && listing.images[0].url; else noImage">
-              <img [src]="listing.images[0].url" 
-                   [alt]="listing.title" 
-                   class="w-full h-full object-cover"/>
-            </ng-container>
-            <ng-template #noImage>
-            <div class="w-full h-full flex items-center justify-center text-white/50 font-retrofuture">
-                No Image
-            </div>
-            </ng-template>
-          </div>
-          
-          <div class="p-4">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-lg font-semibold text-white font-retrofuture">{{listing.title}}</h3>
-              <span class="text-sm text-white/70">{{listing.condition || 'Not specified'}}</span>
-            </div>
-            <p class="text-white/90 mb-2 line-clamp-2">{{listing.description || 'No description available'}}</p>
-          <div class="flex justify-between items-center">
-              <div class="flex flex-col">
-                <span class="text-cyan-400 font-bold">{{listing.price | currency:listing.currency}}</span>
-                <ng-container *ngIf="listing.estimatedValue">
-                  <span class="text-sm text-white/70">
-                    Est. Value: {{listing.estimatedValue | currency:listing.currency}}
-            </span>
-                </ng-container>
-              </div>
-              <span class="text-white/70 text-sm border border-white/70 px-2 py-1 rounded">
-                {{listing.listingType}}
-            </span>
-            </div>
-          </div>
+    <div class="container mx-auto px-4 py-8">
+      <!-- Search and Sort Controls -->
+      <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div class="w-full md:w-1/2">
+          <input
+            type="text"
+            [ngModel]="searchTerm.value"
+            (ngModelChange)="searchTerm.next($event)"
+            placeholder="Search available items..."
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div class="w-full md:w-auto">
+          <select
+            [ngModel]="sortOption.value"
+            (ngModelChange)="sortOption.next($event)"
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="newest">Newest First</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div *ngIf="!isLoading && listings.length === 0" class="text-center py-12">
-        <p class="text-white text-xl font-retrofuture">No items found</p>
-      </div>
+      <!-- Loading State -->
+      @if (isLoading.value) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          @for (item of [1,2,3,4,5,6,8,9,10,11,12]; track item) {
+            <div class="bg-gray-100 rounded-lg p-4 h-64 animate-pulse">
+              <div class="w-full h-40 bg-gray-200 rounded-lg mb-4"></div>
+              <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          }
+        </div>
+      }
 
-      <!-- Pagination -->
-      <div *ngIf="!isLoading && totalPages > 1" class="mt-8 flex justify-center">
-        <mat-paginator 
-          [length]="totalElements"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[12,24,48]"
-          [showFirstLastButtons]="true"
-          class="retro-paginator"
-          (page)="onPageChange($event)">
-        </mat-paginator>
-      </div>
+      <!-- Items Grid -->
+      @if (!isLoading.value && availableItems.value?.content?.length) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          @for (item of getItemsContent(); track item.id) {
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                 (click)="viewItemDetails(item)">
+              @if (item.images && item.images.length > 0 && item.images[0] && item.images[0].url) {
+                <img [src]="item.images[0].url" [alt]="item.title" class="w-full h-48 object-cover"/>
+              } @else {
+                <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                  <span class="text-gray-400">No image</span>
+                </div>
+              }
+              <div class="p-4">
+                <h3 class="text-lg font-semibold mb-2 truncate">{{ item.title }}</h3>
+                <p class="text-gray-600 mb-2" *ngIf="item.estimatedValue">{{ item.estimatedValue | currency }}</p>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">{{ item.condition || 'Condition N/A' }}</span>
+                  <span class="text-sm text-gray-500">{{ item.year || 'Year N/A' }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Load More Button -->
+        @if (!isLastPage()) {
+          <div class="text-center mt-8">
+            <button
+              (click)="loadMore()"
+              class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+            >
+              Load More
+            </button>
+          </div>
+        }
+      }
+
+      <!-- Empty State -->
+      @if (!isLoading.value && !availableItems.value?.content?.length) {
+        <div class="text-center py-12">
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No available items found</h3>
+          <p class="text-gray-500">Try adjusting your search criteria</p>
+        </div>
+      }
     </div>
-  `,
-  styles: [`
-    :host {
-      display: block;
-    }
-    .font-retrofuture {
-      font-family: 'RetroFuture', sans-serif !important;
-    }
-    ::ng-deep .retro-paginator {
-      background: transparent !important;
-    }
-    ::ng-deep .mat-mdc-form-field {
-      @apply bg-black/50 border-2 border-white rounded-lg;
-    }
-    ::ng-deep .mat-mdc-text-field-wrapper {
-      background: transparent !important;
-    }
-    ::ng-deep .mat-mdc-form-field-focus-overlay {
-      background: transparent !important;
-    }
-    ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-      background: transparent !important;
-    }
-    ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-flex {
-      background: transparent !important;
-    }
-    ::ng-deep .mdc-text-field {
-      @apply rounded-t-lg;
-    }
-    ::ng-deep .mat-mdc-form-field-infix {
-      @apply text-white;
-    }
-    ::ng-deep .mdc-floating-label, ::ng-deep .mat-mdc-select-value, ::ng-deep .mat-mdc-select-arrow {
-      @apply text-white !important;
-    }
-    ::ng-deep .mdc-line-ripple::before, ::ng-deep .mdc-line-ripple::after {
-      border-bottom-color: white !important;
-    }
-    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-      display: none;
-    }
-    ::ng-deep .mat-mdc-progress-spinner {
-      --mdc-circular-progress-active-indicator-color: white;
-    }
-  `]
+  `
 })
 export class ListingsComponent implements OnInit {
-  private listSvc = inject(ListingService);
+  private itemService = inject(ItemService);
+  private api = inject(ApiService);
   private router = inject(Router);
-
-  listings: ListingDTO[] = [];
-  isLoading = false;
-  totalElements = 0;
-  totalPages = 0;
-  pageSize = 12;
   
-  // Form controls
-  q = new FormControl('');
-  sortBy = new FormControl('newest');
-  listingType = new FormControl('all');
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  // State
+  searchTerm = new BehaviorSubject<string>('');
+  sortOption = new BehaviorSubject<string>('newest');
+  currentPage = new BehaviorSubject<number>(0);
+  isLoading = new BehaviorSubject<boolean>(true);
+  availableItems = new BehaviorSubject<Page<ItemDTO> | null>(null);
 
   ngOnInit() {
-    this.loadListings();
-
-    // Subscribe to filter changes
-    merge(
-      this.q.valueChanges,
-      this.sortBy.valueChanges,
-      this.listingType.valueChanges
-    ).pipe(
-      startWith(null)
-    ).subscribe(() => {
-      if (this.paginator) {
-        this.paginator.pageIndex = 0;
-      }
-      this.loadListings();
-    });
-  }
-
-  loadListings() {
-    this.isLoading = true;
-    this.listSvc.browse(
-      this.q.value ?? '',
-      this.paginator?.pageIndex ?? 0,
-      this.paginator?.pageSize ?? this.pageSize
+    // Combine search, sort and page changes
+    combineLatest([
+      this.searchTerm.pipe(debounceTime(300), distinctUntilChanged()),
+      this.sortOption,
+      this.currentPage
+    ]).pipe(
+      switchMap(([search, sort, page]) => {
+        this.isLoading.next(true);
+        return this.fetchAvailableItems(search, page, 12, sort);
+      })
     ).subscribe({
-      next: (page: Page<ListingDTO>) => {
-        this.listings = page.content;
-        this.totalElements = page.totalElements;
-        this.totalPages = page.totalPages;
-        this.isLoading = false;
+      next: (response) => {
+        if (this.currentPage.value === 0) {
+          this.availableItems.next(response);
+        } else {
+          // Append new items for infinite scroll
+          const currentItems = this.availableItems.value;
+          if (currentItems) {
+            this.availableItems.next({
+              ...response,
+              content: [...currentItems.content, ...response.content]
+            });
+          } else {
+            this.availableItems.next(response);
+          }
+        }
+        this.isLoading.next(false);
       },
-      error: (err: any) => {
-        console.error('Error loading listings:', err);
-        this.isLoading = false;
+      error: (error) => {
+        console.error('Error fetching available items:', error);
+        this.isLoading.next(false);
       }
     });
   }
 
-  onPageChange(event: PageEvent) {
-    this.loadListings();
+  // Fetch available items using the API
+  fetchAvailableItems(search: string = '', page: number = 0, size: number = 12, sort: string = 'newest') {
+    const params = {
+      q: search,
+      page: page.toString(),
+      size: size.toString(),
+      sort: this.getSortParam(sort),
+      status: 'AVAILABLE'
+    };
+    
+    return this.api.get<Page<ItemDTO>>('/items/available', params);
   }
 
-  viewListing(listing: ListingDTO) {
-    this.router.navigate(['/listings', listing.id]);
+  getItemsContent(): ItemDTO[] {
+    return this.availableItems.value?.content || [];
+  }
+
+  loadMore() {
+    this.currentPage.next(this.currentPage.value + 1);
+  }
+
+  isLastPage(): boolean {
+    const items = this.availableItems.value;
+    return items ? items.last : true;
+  }
+
+  viewItemDetails(item: ItemDTO) {
+    this.router.navigate(['/items', item.id]);
+  }
+
+  private getSortParam(sort: string): string {
+    switch (sort) {
+      case 'price_asc':
+        return 'estimatedValue,asc';
+      case 'price_desc':
+        return 'estimatedValue,desc';
+      case 'newest':
+      default:
+        return 'createdAt,desc';
+    }
   }
 }

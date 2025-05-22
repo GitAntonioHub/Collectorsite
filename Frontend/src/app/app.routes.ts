@@ -19,9 +19,21 @@ export const routes: Routes = [
   {
     path: 'listings',
     children: [
-      { path: 'feed', component: ListingsComponent },
-      { path: ':id', loadComponent: () => import('./listings/listing-detail.component').then(m => m.ListingDetailComponent) },
-      { path: '', component: ListingsComponent }
+      {
+        path: 'available',
+        component: ListingsComponent,
+        title: 'Available Items'
+      },
+      {
+        path: ':id',
+        component: ListingsComponent,
+        title: 'Listing Details'
+      },
+      {
+        path: '',
+        component: ListingsComponent,
+        title: 'Available Items'
+      }
     ]
   },
   { 
