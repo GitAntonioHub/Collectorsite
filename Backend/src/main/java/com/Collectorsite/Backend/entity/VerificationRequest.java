@@ -31,10 +31,9 @@ public class VerificationRequest {
     private VerificationStatus status = VerificationStatus.PENDING;
 
     @ManyToOne @JoinColumn(name = "verified_by_id")
-
     private AppUser verifiedBy;
 
-    @Column(name = "verified_by_id", nullable = true)
+    @Column(name = "verified_by_id", nullable = true, insertable = false, updatable = false)
     private UUID verifiedByUUID;
 
     @Column(name = "requested_at", nullable = false, updatable = false)
