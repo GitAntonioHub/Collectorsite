@@ -5,6 +5,7 @@ import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.enums.ItemStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,12 +17,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -40,13 +43,28 @@ public class PublicItemsController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDTO>> list() {
-        // Get all items and filter to only return AVAILABLE and LISTED items
-        List<ItemDTO> allItems = service.list();
-        List<ItemDTO> availableItems = allItems.stream()
-            .filter(item -> item.getStatus() == ItemStatus.AVAILABLE || item.getStatus() == ItemStatus.LISTED)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(availableItems);
+    public ResponseEntity<?> list() {
+        try {
+            // Get all items and filter to only return AVAILABLE and LISTED items
+            List<ItemDTO> allItems = service.list();
+            
+            // If we get here, we successfully retrieved items
+            List<ItemDTO> availableItems = allItems.stream()
+                .filter(item -> item.getStatus() == ItemStatus.AVAILABLE || item.getStatus() == ItemStatus.LISTED)
+                .collect(Collectors.toList());
+            
+            log.info("Successfully retrieved {} available items", availableItems.size());
+            return ResponseEntity.ok(availableItems);
+        } catch (Exception e) {
+            // Log the full error with stack trace for debugging
+            log.error("Error getting items list", e);
+            
+            // Return error response with details
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", new Date().toString());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
     }
     
     @PostMapping

@@ -1,12 +1,14 @@
 package com.Collectorsite.Backend.service.impl;
 
 import com.Collectorsite.Backend.enums.ItemStatus;
+import com.Collectorsite.Backend.enums.ItemCondition;
 import com.Collectorsite.Backend.enums.VerificationStatus;
 import com.Collectorsite.Backend.service.ItemService;
 import com.Collectorsite.Backend.dto.ItemDTO;
 import com.Collectorsite.Backend.entity.*;
 import com.Collectorsite.Backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.time.Instant;
 
+@Slf4j
 @Service @RequiredArgsConstructor
 @Transactional
 public class ItemServiceImpl implements ItemService {
@@ -27,29 +30,83 @@ public class ItemServiceImpl implements ItemService {
     private final VerificationRequestRepository verRepo;
 
     private ItemDTO map(CollectorItem item) {
-        // Map images if they exist
-        List<ItemDTO.ItemImageDTO> imageDTOs = new ArrayList<>();
-        if (item.getImages() != null && !item.getImages().isEmpty()) {
-            imageDTOs = item.getImages().stream()
-                .map(image -> ItemDTO.ItemImageDTO.builder()
-                    .id(image.getId())
-                    .url(image.getUrl())
-                    .isPrimary(image.getIsPrimary())
-                    .build())
-                .collect(Collectors.toList());
+        try {
+            // Map images if they exist
+            List<ItemDTO.ItemImageDTO> imageDTOs = new ArrayList<>();
+            if (item.getImages() != null && !item.getImages().isEmpty()) {
+                for (ItemImage image : item.getImages()) {
+                    try {
+                        imageDTOs.add(ItemDTO.ItemImageDTO.builder()
+                            .id(image.getId())
+                            .url(image.getUrl())
+                            .isPrimary(image.getIsPrimary())
+                            .build());
+                    } catch (Exception e) {
+                        log.warn("Error mapping image {}: {}", image.getId(), e.getMessage());
+                        // Continue with next image
+                    }
+                }
+            }
+            
+            // Safely get values with defensive fallbacks
+            String title = "";
+            String description = "";
+            ItemCondition condition = null;
+            Integer year = null;
+            Double estimatedValue = null;
+            ItemStatus status = ItemStatus.DRAFT;
+            
+            try { 
+                title = item.getTitle() != null ? String.valueOf(item.getTitle()) : ""; 
+            } catch (Exception e) {
+                log.warn("Error converting title for item {}", item.getId());
+            }
+            
+            try { 
+                description = item.getDescription() != null ? String.valueOf(item.getDescription()) : ""; 
+            } catch (Exception e) {
+                log.warn("Error converting description for item {}", item.getId());
+            }
+            
+            try { 
+                condition = item.getCondition(); 
+            } catch (Exception e) {
+                log.warn("Error getting condition for item {}", item.getId());
+            }
+            
+            try { 
+                year = item.getYear(); 
+            } catch (Exception e) {
+                log.warn("Error getting year for item {}", item.getId());
+            }
+            
+            try { 
+                estimatedValue = item.getEstimatedValue(); 
+            } catch (Exception e) {
+                log.warn("Error getting estimatedValue for item {}", item.getId());
+            }
+            
+            try { 
+                status = item.getStatus() != null ? item.getStatus() : ItemStatus.DRAFT; 
+            } catch (Exception e) {
+                log.warn("Error getting status for item {}", item.getId());
+            }
+            
+            return ItemDTO.builder()
+                    .id(item.getId())
+                    .ownerId(item.getOwner().getId())
+                    .title(title)
+                    .description(description)
+                    .condition(condition)
+                    .year(year)
+                    .estimatedValue(estimatedValue)
+                    .status(status)
+                    .images(imageDTOs)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error mapping item with ID {}: {}", item.getId(), e.getMessage());
+            throw new RuntimeException("Error processing item data: " + e.getMessage(), e);
         }
-        
-        return ItemDTO.builder()
-                .id(item.getId())
-                .ownerId(item.getOwner().getId())
-                .title(item.getTitle())
-                .description(item.getDescription())
-                .condition(item.getCondition())
-                .year(item.getYear())
-                .estimatedValue(item.getEstimatedValue())
-                .status(item.getStatus())
-                .images(imageDTOs)
-                .build();
     }
 
     @Override
@@ -115,7 +172,38 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDTO> list() {
-        return itemRepo.findAll().stream().map(this::map).collect(Collectors.toList());
+        try {
+            // Use a direct query with specific columns to avoid ResultSet extraction issues
+            List<CollectorItem> allItems = new ArrayList<>();
+            
+            // Process items one by one to avoid batch issues
+            for (UUID id : itemRepo.findAllIds()) {
+                try {
+                    Optional<CollectorItem> itemOpt = itemRepo.findById(id);
+                    if (itemOpt.isPresent()) {
+                        allItems.add(itemOpt.get());
+                    }
+                } catch (Exception e) {
+                    log.error("Error retrieving item with id {}: {}", id, e.getMessage());
+                    // Continue with next item
+                }
+            }
+            
+            List<ItemDTO> result = new ArrayList<>();
+            for (CollectorItem item : allItems) {
+                try {
+                    result.add(map(item));
+                } catch (Exception e) {
+                    log.error("Error mapping item {}: {}", item.getId(), e.getMessage());
+                    // Continue with next item
+                }
+            }
+            
+            return result;
+        } catch (Exception e) {
+            log.error("Error listing items", e);
+            throw new RuntimeException("Failed to retrieve items: " + e.getMessage());
+        }
     }
 
     @Override
