@@ -14,7 +14,7 @@ public class TradeOffer {
     @Id @GeneratedValue
     private UUID id;
 
-    @ManyToOne @JoinColumn(nullable = false)
+    @ManyToOne @JoinColumn(name = "offering_user_id", nullable = false)
     private AppUser proposer;
 
     @ManyToOne @JoinColumn(nullable = false)

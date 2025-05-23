@@ -12,7 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,9 +75,6 @@ public class ItemServiceImpl implements ItemService {
                     .createdAt(now)
                     .build();
             
-            // Explicitly set the duplicate field
-            item.setCreatedAtDuplicate(now);
-
             // Save item and get the saved entity with ID
             CollectorItem savedItem = itemRepo.save(item);
             
@@ -208,35 +205,14 @@ public class ItemServiceImpl implements ItemService {
     
     @Override
     public Page<ItemDTO> getAvailableItems(String keyword, ItemStatus status, Pageable pageable) {
-        // If we have a keyword, use it to filter items by title or description
-        List<CollectorItem> filteredItems;
+        Page<CollectorItem> itemsPage;
         
         if (StringUtils.hasText(keyword)) {
-            // Use the new repository method
-            filteredItems = itemRepo.findByStatusAndKeyword(status, keyword);
+            itemsPage = itemRepo.findByStatusAndKeyword(status, keyword, pageable);
         } else {
-            // Just get items by status
-            filteredItems = itemRepo.findByStatus(status);
+            itemsPage = itemRepo.findByStatus(status, pageable);
         }
         
-        // Convert to DTOs
-        List<ItemDTO> itemDTOs = filteredItems.stream()
-            .map(this::map)
-            .collect(Collectors.toList());
-            
-        // Manual pagination
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), itemDTOs.size());
-        
-        // Check bounds
-        if (start > itemDTOs.size()) {
-            start = 0;
-            end = Math.min(pageable.getPageSize(), itemDTOs.size());
-        }
-        
-        // Create sublist for pagination
-        List<ItemDTO> pageContent = itemDTOs.subList(start, end);
-        
-        return new PageImpl<>(pageContent, pageable, itemDTOs.size());
+        return itemsPage.map(this::map);
     }
 }

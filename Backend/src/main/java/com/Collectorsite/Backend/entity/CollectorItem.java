@@ -8,7 +8,7 @@ import com.Collectorsite.Backend.enums.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "collectoritem")
+@Table(name = "collector_item")
 public class CollectorItem {
 
     @Id @GeneratedValue
@@ -43,11 +43,8 @@ public class CollectorItem {
     @Column(name = "status")
     private ItemStatus status = ItemStatus.DRAFT;
 
-    @Column(name = "createdat", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-    
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = true)
-    private Instant createdAtDuplicate;
     
     @PrePersist
     private void onCreate() {
@@ -55,7 +52,6 @@ public class CollectorItem {
         if (createdAt == null) {
             createdAt = now;
         }
-        createdAtDuplicate = createdAt;
     }
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)

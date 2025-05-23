@@ -4,11 +4,13 @@ import com.Collectorsite.Backend.dto.*;
 import com.Collectorsite.Backend.entity.CollectorItem;
 import com.Collectorsite.Backend.entity.Listing;
 import com.Collectorsite.Backend.entity.ItemImage;
+import com.Collectorsite.Backend.entity.AppUser;
 import com.Collectorsite.Backend.enums.ItemStatus;
 import com.Collectorsite.Backend.enums.ListingStatus;
 import com.Collectorsite.Backend.enums.ListingType;
 import com.Collectorsite.Backend.repository.CollectorItemRepository;
 import com.Collectorsite.Backend.repository.ListingRepository;
+import com.Collectorsite.Backend.repository.AppUserRepository;
 import com.Collectorsite.Backend.service.ListingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepo;
     private final CollectorItemRepository itemRepo;
+    private final AppUserRepository userRepo;
 
     /* ---------- helpers ---------- */
 
@@ -77,9 +80,12 @@ public class ListingServiceImpl implements ListingService {
         if (item.getStatus() != ItemStatus.LISTED && item.getStatus() != ItemStatus.DRAFT)
             throw new RuntimeException("Item cannot be listed now");
 
+        AppUser seller = userRepo.findById(sellerId)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+
         Listing listing = new Listing();
-        listing.setId(UUID.randomUUID());
         listing.setItem(item);
+        listing.setSeller(seller);
         listing.setListingType(dto.getListingType() == null ? ListingType.SALE : dto.getListingType());
         listing.setPrice(dto.getPrice());
         listing.setCurrency(dto.getCurrency());
