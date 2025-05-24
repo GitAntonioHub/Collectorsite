@@ -16,9 +16,13 @@ public interface CollectorItemRepository extends JpaRepository<CollectorItem, UU
     // Find items by status
     Page<CollectorItem> findByStatus(ItemStatus status, Pageable pageable);
     
-    // Use custom JPQL query instead of method name to avoid CLOB issues
+    // Use custom JPQL query with proper type handling
     @Query("SELECT i FROM CollectorItem i WHERE i.status = :status AND " +
-           "(i.title ILIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "i.description ILIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "(LOWER(i.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(CAST(i.description AS string)) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<CollectorItem> findByStatusAndKeyword(@Param("status") ItemStatus status, @Param("keyword") String keyword, Pageable pageable);
+    
+    // Get only IDs to avoid ResultSet extraction issues
+    @Query("SELECT i.id FROM CollectorItem i")
+    List<UUID> findAllIds();
 }

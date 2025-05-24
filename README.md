@@ -1,6 +1,6 @@
-# 🛰️ Collectorsite — Retro‑Futuristic Marketplace
+# 🛰️ Collectorsite — Mercado Retro‑Futurista
 
-Buy, sell & trade collectible items with image/document verification, live trade offers, and a retro‑futuristic UI.
+Compra, vende e intercambia artículos de colección con verificación de imágenes/documentos, ofertas de intercambio en vivo y una interfaz de usuario retro‑futurista.
 
 *Back‑end — Spring Boot 3.4.5 | Front‑end — Angular 19.2*
 
@@ -14,73 +14,73 @@ Buy, sell & trade collectible items with image/document verification, live trade
 
 ---
 
-## ✨ Features
+## ✨ Características
 
-| Module            | Highlights                                        |
-| ----------------- | ------------------------------------------------- |
-| **Auth**          | JWT, roles (`USER`, `ADMIN`, `VERIFIER`)          |
-| **Items**         | CRUD, image + PDF upload to MinIO/S3              |
-| **Verification**  | Admin queue, `PENDING→APPROVED/REJECTED` workflow |
-| **Listings**      | Fixed‑price & auction, paginated feed             |
-| **Trade offers**  | Item‑for‑item ± cash, accept/decline              |
-| **Transactions**  | Ownership transfer, payment status skeleton       |
-| **Notifications** | WebSocket push + e‑mail                           |
-| **UI**            | Tailwind, RetroFuture font, spinning holograms    |
+| Módulo             | Destacados                                         |
+| ------------------ | -------------------------------------------------- |
+| **Autenticación**  | JWT, roles (`USUARIO`, `ADMIN`, `VERIFICADOR`)     |
+| **Artículos**      | CRUD, carga de imágenes + PDF a MinIO/S3           |
+| **Verificación**   | Cola de administración, flujo `PENDIENTE→APROBADO/RECHAZADO` |
+| **Publicaciones**  | Precio fijo y subasta, feed paginado              |
+| **Ofertas de Intercambio** | Artículo por artículo ± efectivo, aceptar/rechazar |
+| **Transacciones**  | Transferencia de propiedad, esqueleto de estado de pago |
+| **Notificaciones** | Push por WebSocket + correo electrónico            |
+| **UI**             | Tailwind, fuente RetroFuture, hologramas giratorios |
 
 ---
 
-## 🖥️ Architecture
+## 🖥️ Arquitectura
 
 ```
 Angular 19.2  ⇆  Spring Boot 3.4.5
   (JWT)              │
                      │ REST + STOMP
                      ▼
- PostgreSQL ← Flyway migrations
+ PostgreSQL ← Migraciones Flyway
       │
-      └─ MinIO/S3 for media
+      └─ MinIO/S3 para multimedia
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Inicio Rápido
 
-### Prerequisites
+### Prerrequisitos
 
-| Tool   | Version |
-| ------ | ------- |
-| JDK    | 17+     |
-| Node   | 18+     |
-| npm    | 10+     |
-| Docker | latest  |
+| Herramienta | Versión |
+| ----------- | ------- |
+| JDK         | 17+     |
+| Node        | 18+     |
+| npm         | 10+     |
+| Docker      | última  |
 
-### Run with Docker Compose (Production-ready)
+### Ejecutar con Docker Compose (Listo para Producción)
 
-Clone the repository and run:
+Clona el repositorio y ejecuta:
 
 ```bash
 cd deploy
 docker compose up -d
 ```
 
-Access the application at http://localhost
+Accede a la aplicación en http://localhost
 
-### Development Setup
+### Configuración de Desarrollo
 
-1. Start the database and storage:
+1. Inicia la base de datos y el almacenamiento:
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d db minio
 ```
 
-2. Run the backend:
+2. Ejecuta el backend:
 
 ```bash
 cd Backend
 ./mvnw spring-boot:run -Pdev
 ```
 
-3. Run the frontend:
+3. Ejecuta el frontend:
 
 ```bash
 cd Frontend
@@ -88,36 +88,35 @@ npm install
 npm start
 ```
 
-Access the development application at http://localhost:4200
+Accede a la aplicación de desarrollo en http://localhost:4200
 
-## API Documentation
+## Documentación de la API
 
-The API documentation is available as a Postman collection at `docs/collectorsite-api.postman.json`.
+La documentación de la API está disponible como una colección de Postman en `docs/collectorsite-api.postman.json`.
 
-## Database Migrations
+## Migraciones de Base de Datos
 
-Database migrations are handled automatically by Flyway when the application starts.
+Las migraciones de la base de datos son manejadas automáticamente por Flyway cuando la aplicación se inicia.
 
-To manually run migrations:
+Para ejecutar manualmente las migraciones:
 
 ```bash
 cd Backend
 ./mvnw flyway:migrate
 ```
 
-## Demo Data
+## Datos de Demostración
 
-The application includes seed data (V6 migration) with demo users:
+La aplicación incluye datos de ejemplo (migración V6) con usuarios de demostración:
 
-- alice@example.com / password123 - Regular user
-- bob@example.com / password123 - Regular user
-- carol@example.com / password123 - Admin user
+- alice@example.com / password123 - Usuario regular
+- bob@example.com / password123 - Usuario regular
+- carol@example.com / password123 - Usuario administrador
 
-## Deployment
+## Despliegue
 
-The application can be deployed using the provided Docker setup. For custom deployments, update the environment variables in the docker-compose file accordingly.
+La aplicación se puede desplegar utilizando la configuración de Docker proporcionada. Para despliegues personalizados, actualiza las variables de entorno en el archivo docker-compose correspondientemente.
 
-## License
+## Licencia
 
-MIT © 2025 Collectorsite Team
-
+MIT © 2025 Equipo Collectorsite 
