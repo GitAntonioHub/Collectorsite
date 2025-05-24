@@ -119,4 +119,4 @@ La aplicación se puede desplegar utilizando la configuración de Docker proporc
 
 ## Licencia
 
-MIT © 2025 Equipo Collectorsite 
+Antonio © 2025 Equipo Collectorsite 
