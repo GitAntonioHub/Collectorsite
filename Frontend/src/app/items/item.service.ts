@@ -15,27 +15,27 @@ export class ItemService {
 
   // Get user's items
   getMyItems(): Observable<ItemDTO[]> {
-    return this.api.get<ItemDTO[]>('/my-items');
+    return this.api.get<ItemDTO[]>('/items/my');
   }
 
   // Get single item
   get(id: string): Observable<ItemDTO> {
-    return this.api.get<ItemDTO>(`/my-items/${id}`);
+    return this.api.get<ItemDTO>(`/items/${id}`);
   }
 
   // Create new item
   create(dto: Partial<ItemDTO>): Observable<ItemDTO> {
-    return this.api.post<ItemDTO>('/my-items', dto);
+    return this.api.post<ItemDTO>('/items', dto);
   }
 
   // Update item
   update(id: string, dto: Partial<ItemDTO>): Observable<ItemDTO> {
-    return this.api.put<ItemDTO>(`/my-items/${id}`, dto);
+    return this.api.put<ItemDTO>(`/items/${id}`, dto);
   }
 
   // Delete item
   delete(id: string): Observable<void> {
-    return this.api.delete<void>(`/my-items/${id}`);
+    return this.api.delete<void>(`/items/${id}`);
   }
 
   // Verify item (admin only)

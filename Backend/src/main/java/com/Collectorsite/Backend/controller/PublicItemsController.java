@@ -82,15 +82,54 @@ public class PublicItemsController {
             return ResponseEntity.badRequest().build();
         }
     }
-    
-    // Add a redirect for /items/my-items to point users to the correct endpoint
-    @GetMapping("/my-items")
-    public ResponseEntity<Void> redirectMyItems() {
-        return ResponseEntity.status(301)
-            .header("Location", "/my-items")
-            .build();
+
+    @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ItemDTO>> getMyItems(Principal principal) {
+        try {
+            UUID ownerId = UUID.fromString(principal.getName());
+            return ResponseEntity.ok(service.getItemsByOwner(ownerId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
-    
+
+    @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ItemDTO> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody ItemDTO dto,
+            Principal principal) {
+        try {
+            UUID ownerId = UUID.fromString(principal.getName());
+            return ResponseEntity.ok(service.update(id, dto, ownerId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> delete(@PathVariable UUID id, Principal principal) {
+        try {
+            UUID ownerId = UUID.fromString(principal.getName());
+            service.delete(id, ownerId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}/verify")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ItemDTO> verifyItem(@PathVariable UUID id) {
+        try {
+            return ResponseEntity.ok(service.verifyItem(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/available")
     public ResponseEntity<Page<ItemDTO>> getAvailableItems(
             @RequestParam(defaultValue = "") String q, 
