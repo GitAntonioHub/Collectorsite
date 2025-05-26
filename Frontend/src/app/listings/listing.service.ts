@@ -27,7 +27,7 @@ export class ListingService {
       page: page.toString(),
       size: size.toString()
     };
-    return this.api.get<Page<ListingDTO>>('/listings/my-listings', params);
+    return this.api.get<Page<ListingDTO>>('/api/listings/my-listings', params);
   }
 
   // Get single listing
@@ -37,22 +37,22 @@ export class ListingService {
 
   // Create new listing
   create(dto: Partial<ListingDTO>): Observable<ListingDTO> { 
-    return this.api.post<ListingDTO>('/listings', dto); 
+    return this.api.post<ListingDTO>('/api/listings', dto); 
   }
 
   // Update listing
   update(id: string, dto: Partial<ListingDTO>): Observable<ListingDTO> {
-    return this.api.put<ListingDTO>(`/listings/${id}`, dto);
+    return this.api.put<ListingDTO>(`/api/listings/${id}`, dto);
   }
 
   // Close listing
   close(id: string): Observable<ListingDTO> { 
-    return this.api.put<ListingDTO>(`/listings/${id}/close`, {}); 
+    return this.api.put<ListingDTO>(`/api/listings/${id}/close`, {}); 
   }
 
   // Delete listing
   delete(id: string): Observable<void> {
-    return this.api.delete<void>(`/listings/${id}`);
+    return this.api.delete<void>(`/api/listings/${id}`);
   }
 
   private getSortParam(sort: string): string {

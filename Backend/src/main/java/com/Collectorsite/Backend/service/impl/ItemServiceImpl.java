@@ -133,22 +133,25 @@ public class ItemServiceImpl implements ItemService {
                     .build();
             
             // Save item and get the saved entity with ID
-            CollectorItem savedItem = itemRepo.save(item);
+            itemRepo.save(item);
             
             // Force immediate database insert with flush
             itemRepo.flush();
             
-            System.out.println("Item saved with ID: " + savedItem.getId());
+            // Re-fetch the item to ensure it's managed and has its ID
+            CollectorItem persistedItem = itemRepo.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve saved item with ID: " + item.getId()));
 
-            // Create verification request - explicitly copy the saved item ID instead of using entity reference
+            System.out.println("Item re-fetched with ID: " + persistedItem.getId());
+
+            // Create verification request
             VerificationRequest request = new VerificationRequest();
-            request.setItem(savedItem);
+            request.setItem(persistedItem); // Use the re-fetched item
             request.setRequestedBy(owner);
-            request.setRequestedByUUID(owner.getId());
             request.setStatus(VerificationStatus.PENDING);
             request.setRequestedAt(Instant.now());
 
-            System.out.println("Saving verification request with item ID: " + savedItem.getId() + 
+            System.out.println("Saving verification request with item ID: " + persistedItem.getId() +
                     " and requestedBy ID: " + owner.getId());
                 
             // Save verification request and flush to ensure it's written
@@ -157,7 +160,7 @@ public class ItemServiceImpl implements ItemService {
             
             System.out.println("Verification request saved successfully with ID: " + savedRequest.getId());
 
-            return map(savedItem);
+            return map(persistedItem); // Use persistedItem for mapping
         } catch (Exception e) {
             System.out.println("Error creating item: " + e.getMessage());
             e.printStackTrace(); // Add stack trace for better debugging

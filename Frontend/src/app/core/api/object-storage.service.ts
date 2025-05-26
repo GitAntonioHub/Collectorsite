@@ -1,12 +1,12 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpEvent, HttpRequest} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {environment} from '../../../enviroments/enviroment';
+import {environment} from '../../../environments/environment';
 
 @Injectable({providedIn: 'root'})
 export class ObjectStorageService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.api}/upload`;
+  private readonly base = `${environment.apiUrl}/upload`;
 
   /**
    * Raw stream upload – returns the standard HttpEvent stream so you can

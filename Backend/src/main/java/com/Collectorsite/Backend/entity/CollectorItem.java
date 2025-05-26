@@ -8,7 +8,7 @@ import com.Collectorsite.Backend.enums.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "collector_item")
+@Table(name = "collectoritem")
 public class CollectorItem {
 
     @Id @GeneratedValue
@@ -23,6 +23,23 @@ public class CollectorItem {
 
     @Column(name = "title", nullable = false, length = 150)
     private String title;
+
+    @Column(name = "createdat", nullable = false, updatable = false)
+    private Instant createdAt;
+    
+    @PrePersist
+    private void onCreate() {
+        Instant now = Instant.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+    }
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemImage> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemDocument> documents = new ArrayList<>();
 
     @Lob
     @Column(name = "description", columnDefinition = "text")
@@ -42,21 +59,4 @@ public class CollectorItem {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ItemStatus status = ItemStatus.DRAFT;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-    
-    @PrePersist
-    private void onCreate() {
-        Instant now = Instant.now();
-        if (createdAt == null) {
-            createdAt = now;
-        }
-    }
-
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemImage> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemDocument> documents = new ArrayList<>();
 }
